@@ -964,10 +964,10 @@ THREE.GLTFLoader = (function() {
     camera.position.set(0, 0, 5);
 
     // Lighting — bright white ambient + strong key + purple fill
-    const ambient = new THREE.AmbientLight(0xffffff, 2.5);
+    const ambient = new THREE.AmbientLight(0xffffff, 8);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 10.0);
     keyLight.position.set(3, 4, 5);
     scene.add(keyLight);
 
@@ -975,7 +975,7 @@ THREE.GLTFLoader = (function() {
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 6.0);
     rimLight.position.set(0, -5, -3);
     scene.add(rimLight);
 
