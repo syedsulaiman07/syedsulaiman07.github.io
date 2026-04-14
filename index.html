@@ -108,8 +108,9 @@
     #hero-model-wrap {
       position: absolute;
       top: 0;
-      right: -5vw;
-      width: 60vw;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
       height: 100%;
       z-index: 1;
       pointer-events: none;
@@ -962,19 +963,19 @@ THREE.GLTFLoader = (function() {
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
     camera.position.set(0, 0, 5);
 
-    // Lighting — cool teal key + purple fill to match site palette
-    const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+    // Lighting — bright white ambient + strong key + purple fill
+    const ambient = new THREE.AmbientLight(0xffffff, 2.5);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0x3dffc0, 2.5);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
     keyLight.position.set(3, 4, 5);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xa78bfa, 1.2);
+    const fillLight = new THREE.DirectionalLight(0xa78bfa, 3.0);
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x3dffc0, 0.8);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
     rimLight.position.set(0, -5, -3);
     scene.add(rimLight);
 
