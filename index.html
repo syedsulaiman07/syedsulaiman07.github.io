@@ -96,9 +96,42 @@
       display: flex;
       align-items: center;
       padding-top: 56px;
+      position: relative;
     }
     .hero-inner {
       padding: 6rem 0 4rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── 3D Model Canvas ── */
+    #hero-model-wrap {
+      position: absolute;
+      top: 0;
+      right: -5vw;
+      width: 60vw;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      animation: modelFadeIn 1.2s ease 1s forwards;
+    }
+    #hero-model-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Gradient overlay: blend model into the dark background on the left */
+    #hero-model-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, var(--bg) 0%, transparent 35%),
+                  linear-gradient(to top, var(--bg) 0%, transparent 15%),
+                  linear-gradient(to bottom, var(--bg) 0%, transparent 12%);
+      pointer-events: none;
+    }
+    @keyframes modelFadeIn {
+      to { opacity: 1; }
     }
     .hero-tag {
       font-size: 11px;
@@ -469,6 +502,10 @@
 
 <!-- Hero -->
 <section id="hero">
+  <div id="hero-model-wrap">
+    <canvas id="hero-model-canvas"></canvas>
+    <div id="hero-model-fade"></div>
+  </div>
   <div class="wrap">
     <div class="hero-inner">
       <p class="hero-tag">// Electronics &amp; Embedded Systems Engineer</p>
@@ -750,6 +787,20 @@
 
 <!-- Three.js circuit board background -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- GLTFLoader for the Raspberry Pi model -->
+<script>
+// Inline GLTFLoader (r128 compatible)
+THREE.GLTFLoader = (function() {
+  'use strict';
+  // We'll use a dynamic import approach via a small loader shim
+  // Since CDN GLTFLoader for r128 is at a specific path:
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.min.js';
+  document.head.appendChild(script);
+  return null;
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (function() {
   const canvas = document.getElementById('bg-canvas');
@@ -878,6 +929,139 @@
   }, { threshold: 0.12 });
 
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+</script>
+
+<!-- Raspberry Pi 3D model in hero -->
+<script>
+(function() {
+  const canvas = document.getElementById('hero-model-canvas');
+  if (!canvas) return;
+
+  function init() {
+    if (!THREE.GLTFLoader) {
+      setTimeout(init, 100);
+      return;
+    }
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.physicallyCorrectLights = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    function resize() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+    camera.position.set(0, 0, 5);
+
+    // Lighting — cool teal key + purple fill to match site palette
+    const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambient);
+
+    const keyLight = new THREE.DirectionalLight(0x3dffc0, 2.5);
+    keyLight.position.set(3, 4, 5);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xa78bfa, 1.2);
+    fillLight.position.set(-4, -2, 3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0x3dffc0, 0.8);
+    rimLight.position.set(0, -5, -3);
+    scene.add(rimLight);
+
+    let model = null;
+    let mixer = null;
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(
+      'raspberry_pi.glb',
+      function(gltf) {
+        model = gltf.scene;
+
+        // Centre and scale model to fit view
+        const box = new THREE.Box3().setFromObject(model);
+        const centre = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 2.8 / maxDim;
+
+        model.position.sub(centre);
+        model.scale.setScalar(scale);
+
+        // Enhance material appearance
+        model.traverse(child => {
+          if (child.isMesh && child.material) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+              mat.envMapIntensity = 1.0;
+              if (mat.metalness !== undefined) mat.metalness = Math.min(mat.metalness + 0.1, 1);
+            });
+          }
+        });
+
+        // Slight initial tilt for a dynamic feel
+        model.rotation.x = 0.3;
+        model.rotation.y = -0.4;
+
+        scene.add(model);
+
+        // Animations if any
+        if (gltf.animations && gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(model);
+          gltf.animations.forEach(clip => mixer.clipAction(clip).play());
+        }
+      },
+      undefined,
+      function(err) { console.warn('GLB load error:', err); }
+    );
+
+    // Mouse parallax tracking
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+    window.addEventListener('mousemove', e => {
+      targetX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+      targetY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+    });
+
+    const clock = new THREE.Clock();
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const elapsed = clock.elapsedTime;
+
+      if (mixer) mixer.update(delta);
+
+      if (model) {
+        // Smooth mouse parallax
+        currentX += (targetX - currentX) * 0.04;
+        currentY += (targetY - currentY) * 0.04;
+
+        // Slow auto-rotation + gentle float
+        model.rotation.y = -0.4 + elapsed * 0.18 + currentX * 0.5;
+        model.rotation.x = 0.3 + Math.sin(elapsed * 0.4) * 0.08 - currentY * 0.3;
+        model.position.y = Math.sin(elapsed * 0.6) * 0.12;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  }
+
+  init();
 })();
 </script>
 
