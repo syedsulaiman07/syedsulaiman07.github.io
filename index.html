@@ -17,13 +17,6 @@
       --muted: #6b6b88;
       --mono: 'JetBrains Mono', monospace;
       --display: 'Syne', sans-serif;
-
-      /* ── Hero text transparency ── */
-      /* Adjust these 0.0 (invisible) → 1.0 (fully opaque) */
-      --hero-tag-opacity: 0.7;       /* "// Electronics & Embedded..." line */
-      --hero-name-opacity: 0.92;     /* "Syed" (full opacity looks best for name) */
-      --hero-name-span-opacity: 1.0; /* "Sulaiman." gradient — keep at 1 */
-      --hero-desc-opacity: 0.55;     /* description paragraph */
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -150,11 +143,7 @@
       color: var(--accent);
       margin-bottom: 1.5rem;
       opacity: 0;
-      animation: fadeUpTag 0.6s ease 0.2s forwards;
-    }
-    @keyframes fadeUpTag {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: var(--hero-tag-opacity); transform: translateY(0); }
+      animation: fadeUp 0.6s ease 0.2s forwards;
     }
     .hero-name {
       font-family: var(--display);
@@ -164,11 +153,7 @@
       letter-spacing: -0.02em;
       margin-bottom: 1.5rem;
       opacity: 0;
-      animation: fadeUpName 0.6s ease 0.35s forwards;
-    }
-    @keyframes fadeUpName {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: var(--hero-name-opacity); transform: translateY(0); }
+      animation: fadeUp 0.6s ease 0.35s forwards;
     }
     .hero-name span {
       display: block;
@@ -176,7 +161,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      opacity: var(--hero-name-span-opacity);
     }
     .hero-desc {
       max-width: 540px;
@@ -185,11 +169,7 @@
       line-height: 1.9;
       margin-bottom: 2.5rem;
       opacity: 0;
-      animation: fadeUpDesc 0.6s ease 0.5s forwards;
-    }
-    @keyframes fadeUpDesc {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: var(--hero-desc-opacity); transform: translateY(0); }
+      animation: fadeUp 0.6s ease 0.5s forwards;
     }
     .hero-cta {
       display: flex;
@@ -955,30 +935,11 @@ THREE.GLTFLoader = (function() {
 })();
 </script>
 
-<!-- PCB 3D model in hero — loads AFTER page is fully rendered -->
+<!-- PCB 3D model in hero -->
 <script>
 (function() {
   const canvas = document.getElementById('hero-model-canvas');
   if (!canvas) return;
-
-  // Wait for the full page to load first, then start the model
-  // This ensures hero text, nav, and all sections are painted before
-  // the GPU is handed to the GLB loader.
-  function startWhenReady() {
-    // requestIdleCallback fires when the browser is idle after load.
-    // Fallback to setTimeout 1500ms for Safari which doesn't support it.
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(init, { timeout: 2000 });
-    } else {
-      setTimeout(init, 1500);
-    }
-  }
-
-  if (document.readyState === 'complete') {
-    startWhenReady();
-  } else {
-    window.addEventListener('load', startWhenReady);
-  }
 
   function init() {
     if (!THREE.GLTFLoader) {
@@ -1005,10 +966,10 @@ THREE.GLTFLoader = (function() {
     camera.position.set(0, 0, 5);
 
     // Lighting — bright white ambient + strong key + purple fill
-    const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+    const ambient = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
     keyLight.position.set(10, 10, 5);
     scene.add(keyLight);
 
@@ -1016,7 +977,7 @@ THREE.GLTFLoader = (function() {
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
     rimLight.position.set(0, -5, -3);
     scene.add(rimLight);
 
@@ -1107,33 +1068,5 @@ THREE.GLTFLoader = (function() {
 })();
 </script>
 
-<!--
-  ═══════════════════════════════════════════════════════
-  LOCAL TESTING — WHY THE PCB MODEL DOESN'T LOAD LOCALLY
-  ═══════════════════════════════════════════════════════
-  Browsers block loading .glb files when you open index.html
-  directly from your file system (file:// URLs) due to CORS
-  security rules. The .glb fetch is treated as a cross-origin
-  request and silently blocked.
-
-  FIX: Run a local server in the same folder as index.html.
-  Pick whichever you have installed:
-
-    Python 3 (most likely already installed):
-      python3 -m http.server 8080
-      → open http://localhost:8080
-
-    Node.js:
-      npx serve .
-      → open the URL it prints
-
-    VS Code:
-      Install the "Live Server" extension → right-click
-      index.html → "Open with Live Server"
-
-  On GitHub Pages this works fine because it serves over HTTPS,
-  which has no such restriction.
-  ═══════════════════════════════════════════════════════
--->
 </body>
 </html>
