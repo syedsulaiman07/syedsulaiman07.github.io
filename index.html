@@ -108,9 +108,11 @@
     #hero-model-wrap {
       position: absolute;
       top: 0;
-      left: 50%;
+      right: -5vw;
+      width: 60vw;
+      /*left: 50%;
       transform: translateX(-50%);
-      width: 100%;
+      width: 100%;*/
       height: 100%;
       z-index: 1;
       pointer-events: none;
@@ -788,7 +790,7 @@
 
 <!-- Three.js circuit board background -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<!-- GLTFLoader for the Raspberry Pi model -->
+<!-- GLTFLoader for the PCB model -->
 <script>
 // Inline GLTFLoader (r128 compatible)
 THREE.GLTFLoader = (function() {
@@ -933,7 +935,7 @@ THREE.GLTFLoader = (function() {
 })();
 </script>
 
-<!-- Raspberry Pi 3D model in hero -->
+<!-- PCB 3D model in hero -->
 <script>
 (function() {
   const canvas = document.getElementById('hero-model-canvas');
@@ -964,10 +966,10 @@ THREE.GLTFLoader = (function() {
     camera.position.set(0, 0, 5);
 
     // Lighting — bright white ambient + strong key + purple fill
-    const ambient = new THREE.AmbientLight(0xffffff, 8);
+    const ambient = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 50.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
     keyLight.position.set(10, 10, 5);
     scene.add(keyLight);
 
@@ -975,7 +977,7 @@ THREE.GLTFLoader = (function() {
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 60.0);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
     rimLight.position.set(0, -5, -3);
     scene.add(rimLight);
 
@@ -984,7 +986,7 @@ THREE.GLTFLoader = (function() {
     const loader = new THREE.GLTFLoader();
 
     loader.load(
-      'raspberry_pi.glb',
+      'SYSON.glb',
       function(gltf) {
         model = gltf.scene;
 
