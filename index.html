@@ -17,6 +17,13 @@
       --muted: #6b6b88;
       --mono: 'JetBrains Mono', monospace;
       --display: 'Syne', sans-serif;
+
+      /* ── Hero text transparency ── */
+      /* Adjust these 0.0 (invisible) → 1.0 (fully opaque) */
+      --hero-tag-opacity: 0.6;       /* "// Electronics & Embedded..." line */
+      --hero-name-opacity: 0.5;     /* "Syed" (full opacity looks best for name) */
+      --hero-name-span-opacity: 5; /* "Sulaiman." gradient — keep at 1 */
+      --hero-desc-opacity: 0.55;     /* description paragraph */
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -116,7 +123,7 @@
       height: 100%;
       z-index: 1;
       pointer-events: none;
-      opacity: 0;
+      opacity: 100;
       animation: modelFadeIn 1.2s ease 1s forwards;
     }
     #hero-model-canvas {
@@ -143,7 +150,11 @@
       color: var(--accent);
       margin-bottom: 1.5rem;
       opacity: 0;
-      animation: fadeUp 0.6s ease 0.2s forwards;
+      animation: fadeUpTag 0.6s ease 0.2s forwards;
+    }
+    @keyframes fadeUpTag {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: var(--hero-tag-opacity); transform: translateY(0); }
     }
     .hero-name {
       font-family: var(--display);
@@ -153,7 +164,11 @@
       letter-spacing: -0.02em;
       margin-bottom: 1.5rem;
       opacity: 0;
-      animation: fadeUp 0.6s ease 0.35s forwards;
+      animation: fadeUpName 0.6s ease 0.35s forwards;
+    }
+    @keyframes fadeUpName {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: var(--hero-name-opacity); transform: translateY(0); }
     }
     .hero-name span {
       display: block;
@@ -161,6 +176,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      opacity: var(--hero-name-span-opacity);
     }
     .hero-desc {
       max-width: 540px;
@@ -169,7 +185,11 @@
       line-height: 1.9;
       margin-bottom: 2.5rem;
       opacity: 0;
-      animation: fadeUp 0.6s ease 0.5s forwards;
+      animation: fadeUpDesc 0.6s ease 0.5s forwards;
+    }
+    @keyframes fadeUpDesc {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: var(--hero-desc-opacity); transform: translateY(0); }
     }
     .hero-cta {
       display: flex;
@@ -788,26 +808,19 @@
   </div>
 </footer>
 
-<!-- Three.js circuit board background -->
+<!-- Three.js + GLTFLoader (single source, Chrome-safe) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<!-- GLTFLoader for the PCB model -->
-<script>
-// Inline GLTFLoader (r128 compatible)
-THREE.GLTFLoader = (function() {
-  'use strict';
-  // We'll use a dynamic import approach via a small loader shim
-  // Since CDN GLTFLoader for r128 is at a specific path:
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.min.js';
-  document.head.appendChild(script);
-  return null;
-})();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 (function() {
   const canvas = document.getElementById('bg-canvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: 'default',       // Chrome needs this explicit
+    failIfMajorPerformanceCaveat: false
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -935,19 +948,46 @@ THREE.GLTFLoader = (function() {
 })();
 </script>
 
-<!-- PCB 3D model in hero -->
+<!-- PCB 3D model in hero — loads AFTER page is fully rendered -->
 <script>
 (function() {
   const canvas = document.getElementById('hero-model-canvas');
   if (!canvas) return;
 
+  // Wait for the full page to load first, then start the model
+  // This ensures hero text, nav, and all sections are painted before
+  // the GPU is handed to the GLB loader.
+  function startWhenReady() {
+    // requestIdleCallback fires when the browser is idle after load.
+    // Fallback to setTimeout 1500ms for Safari which doesn't support it.
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(init, { timeout: 2000 });
+    } else {
+      setTimeout(init, 1500);
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    startWhenReady();
+  } else {
+    window.addEventListener('load', startWhenReady);
+  }
+
   function init() {
-    if (!THREE.GLTFLoader) {
-      setTimeout(init, 100);
+    // Both <script> tags are synchronous so by window 'load' they're
+    // guaranteed executed. No polling loop needed (that's what broke Chrome).
+    if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
+      console.warn('GLTFLoader unavailable — PCB model skipped');
       return;
     }
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'default',
+      failIfMajorPerformanceCaveat: false
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.physicallyCorrectLights = true;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -966,18 +1006,18 @@ THREE.GLTFLoader = (function() {
     camera.position.set(0, 0, 5);
 
     // Lighting — bright white ambient + strong key + purple fill
-    const ambient = new THREE.AmbientLight(0xffffff, 3);
+    const ambient = new THREE.AmbientLight(0xffffff, 6);
     scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 6.0);
     keyLight.position.set(10, 10, 5);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xa78bfa, 3.0);
+    const fillLight = new THREE.DirectionalLight(0xa78bfa, 5.0);
     fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 6.0);
     rimLight.position.set(0, -5, -3);
     scene.add(rimLight);
 
@@ -986,11 +1026,10 @@ THREE.GLTFLoader = (function() {
     const loader = new THREE.GLTFLoader();
 
     loader.load(
-      'raspberry_pi.glb',
+      './SYSCON2.glb',
       function(gltf) {
         model = gltf.scene;
 
-        // Centre and scale model to fit view
         const box = new THREE.Box3().setFromObject(model);
         const centre = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -1000,7 +1039,6 @@ THREE.GLTFLoader = (function() {
         model.position.sub(centre);
         model.scale.setScalar(scale);
 
-        // Enhance material appearance
         model.traverse(child => {
           if (child.isMesh && child.material) {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -1011,13 +1049,10 @@ THREE.GLTFLoader = (function() {
           }
         });
 
-        // Slight initial tilt for a dynamic feel
         model.rotation.x = 0.3;
         model.rotation.y = -0.4;
-
         scene.add(model);
 
-        // Animations if any
         if (gltf.animations && gltf.animations.length) {
           mixer = new THREE.AnimationMixer(model);
           gltf.animations.forEach(clip => mixer.clipAction(clip).play());
@@ -1026,6 +1061,25 @@ THREE.GLTFLoader = (function() {
       undefined,
       function(err) { console.warn('GLB load error:', err); }
     );
+
+    // ── Flip animation state machine ──────────────────────────────
+    // Phase 0: rotating top-side up  (duration: ROTATE_DURATION)
+    // Phase 1: flipping to bottom    (duration: FLIP_DURATION)
+    // Phase 2: rotating bottom-side  (duration: ROTATE_DURATION)
+    // Phase 3: flipping back to top  (duration: FLIP_DURATION)
+    const ROTATE_DURATION = 6.0;   // seconds each side stays visible
+    const FLIP_DURATION   = 1.4;   // seconds the flip transition takes
+
+    let phase = 0;
+    let phaseStart = 0;            // elapsed time when current phase began
+    let baseRotY = -0.4;           // y-rotation accumulator between phases
+    let flipStartX = 0.3;          // x-rotation at start of flip
+    let flipTargetX = Math.PI + 0.3; // x-rotation at end of first flip
+
+    // Smooth easing
+    function easeInOut(t) {
+      return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+    }
 
     // Mouse parallax tracking
     let targetX = 0, targetY = 0;
@@ -1052,10 +1106,42 @@ THREE.GLTFLoader = (function() {
         currentX += (targetX - currentX) * 0.04;
         currentY += (targetY - currentY) * 0.04;
 
-        // Slow auto-rotation + gentle float
-        model.rotation.y = -0.4 + elapsed * 0.18 + currentX * 0.5;
-        model.rotation.x = 0.3 + Math.sin(elapsed * 0.4) * 0.08 - currentY * 0.3;
-        model.position.y = Math.sin(elapsed * 0.6) * 0.12;
+        const t = elapsed - phaseStart; // time within current phase
+
+        if (phase === 0 || phase === 2) {
+          // ── Rotating phase ──
+          // Slow Y spin + gentle float bob
+          model.rotation.y = baseRotY + t * 0.18 + currentX * 0.5;
+          model.rotation.x = flipStartX + Math.sin(t * 0.4) * 0.06 - currentY * 0.3;
+          model.position.y = Math.sin(t * 0.6) * 0.12;
+
+          if (t >= ROTATE_DURATION) {
+            // Snapshot y-rotation so flip starts from current angle
+            baseRotY = model.rotation.y;
+            flipStartX = model.rotation.x;
+            flipTargetX = flipStartX + Math.PI; // flip 180° on X axis
+            phaseStart = elapsed;
+            phase = phase === 0 ? 1 : 3;
+          }
+
+        } else {
+          // ── Flip transition phase ──
+          const p = Math.min(t / FLIP_DURATION, 1.0);
+          const e = easeInOut(p);
+
+          model.rotation.x = flipStartX + e * Math.PI;
+          // Keep a slow drift during flip so it doesn't freeze in Y
+          model.rotation.y = baseRotY + t * 0.08 + currentX * 0.5;
+          model.position.y = Math.sin(p * Math.PI) * 0.25; // slight arc
+
+          if (p >= 1.0) {
+            // Flip done — update base state for next rotate phase
+            flipStartX = model.rotation.x;
+            baseRotY = model.rotation.y;
+            phaseStart = elapsed;
+            phase = phase === 1 ? 2 : 0;
+          }
+        }
       }
 
       renderer.render(scene, camera);
