@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Syed Sulaiman — Hardware & Embedded Engineer</title>
+ <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+ <style>
+   :root {
+     --bg: #0a0a0f;
+     --bg2: #0f0f18;
+     --surface: #14141f;
+     --border: rgba(100,220,180,0.12);
+     --accent: #3dffc0;
+     --accent2: #a78bfa;
+     --text: #e8e8f0;
+     --muted: #6b6b88;
+     --mono: 'JetBrains Mono', monospace;
+     --display: 'Syne', sans-serif;
+
+
+     /* ── Hero text transparency ── */
+     /* Adjust these 0.0 (invisible) → 1.0 (fully opaque) */
+     --hero-tag-opacity: 0.6;       /* "// Electronics & Embedded..." line */
+     --hero-name-opacity: 0.5;     /* "Syed" (full opacity looks best for name) */
+     --hero-name-span-opacity: 5; /* "Sulaiman." gradient — keep at 1 */
+     --hero-desc-opacity: 0.55;     /* description paragraph */
+   }
+
+
+   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+   html { scroll-behavior: smooth; }
+
+
+   body {
+     background: var(--bg);
+     color: var(--text);
+     font-family: var(--mono);
+     font-size: 14px;
+     line-height: 1.8;
+     overflow-x: hidden;
+   }
+
+
+   /* ── Canvas background ── */
+   #bg-canvas {
+     position: fixed;
+     inset: 0;
+     z-index: 0;
+     opacity: 0.55;
+   }
+
+
+   /* ── Layout wrapper ── */
+   .wrap {
+     position: relative;
+     z-index: 1;
+     max-width: 900px;
+     margin: 0 auto;
+     padding: 0 2rem;
+   }
+
+
+   /* ── Navigation ── */
+   nav {
+     position: fixed;
+     top: 0; left: 0; right: 0;
+     z-index: 100;
+     background: rgba(10,10,15,0.8);
+     backdrop-filter: blur(12px);
+     border-bottom: 1px solid var(--border);
+   }
+   .nav-inner {
+     max-width: 900px;
+     margin: 0 auto;
+     padding: 0 2rem;
+     height: 56px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+   }
+   .nav-logo {
+     font-family: var(--display);
+     font-weight: 800;
+     font-size: 16px;
+     color: var(--accent);
+     letter-spacing: 0.02em;
+     text-decoration: none;
+   }
+   .nav-links {
+     display: flex;
+     gap: 2rem;
+     list-style: none;
+   }
+   .nav-links a {
+     color: var(--muted);
+     text-decoration: none;
+     font-size: 12px;
+     letter-spacing: 0.08em;
+     text-transform: uppercase;
+     transition: color 0.2s;
+   }
+   .nav-links a:hover { color: var(--accent); }
+
+
+   /* ── Hero ── */
+   #hero {
+     min-height: 100vh;
+     display: flex;
+     align-items: center;
+     padding-top: 56px;
+     position: relative;
+   }
+   .hero-inner {
+     padding: 6rem 0 4rem;
+     position: relative;
+     z-index: 2;
+   }
+
+
+   /* ── 3D Model Canvas ── */
+   #hero-model-wrap {
+     position: absolute;
+     top: 0;
+     right: -5vw;
+     width: 60vw;
+     /*left: 50%;
+     transform: translateX(-50%);
+     width: 100%;*/
+     height: 100%;
+     z-index: 1;
+     pointer-events: none;
+     opacity: 100;
+     animation: modelFadeIn 1.2s ease 1s forwards;
+   }
+   #hero-model-canvas {
+     width: 100%;
+     height: 100%;
+     display: block;
+   }
+   /* Gradient overlay: blend model into the dark background on the left */
+   #hero-model-fade {
+     position: absolute;
+     inset: 0;
+     background: linear-gradient(to right, var(--bg) 0%, transparent 35%),
+                 linear-gradient(to top, var(--bg) 0%, transparent 15%),
+                 linear-gradient(to bottom, var(--bg) 0%, transparent 12%);
+     pointer-events: none;
+   }
+   @keyframes modelFadeIn {
+     to { opacity: 1; }
+   }
+   .hero-tag {
+     font-size: 11px;
+     letter-spacing: 0.15em;
+     text-transform: uppercase;
+     color: var(--accent);
+     margin-bottom: 1.5rem;
+     opacity: 0;
+     animation: fadeUpTag 0.6s ease 0.2s forwards;
+   }
+   @keyframes fadeUpTag {
+     from { opacity: 0; transform: translateY(16px); }
+     to { opacity: var(--hero-tag-opacity); transform: translateY(0); }
+   }
+   .hero-name {
+     font-family: var(--display);
+     font-size: clamp(2.8rem, 8vw, 5.5rem);
+     font-weight: 800;
+     line-height: 1.05;
+     letter-spacing: -0.02em;
+     margin-bottom: 1.5rem;
+     opacity: 0;
+     animation: fadeUpName 0.6s ease 0.35s forwards;
+   }
+   @keyframes fadeUpName {
+     from { opacity: 0; transform: translateY(16px); }
+     to { opacity: var(--hero-name-opacity); transform: translateY(0); }
+   }
+   .hero-name span {
+     display: block;
+     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+     -webkit-background-clip: text;
+     -webkit-text-fill-color: transparent;
+     background-clip: text;
+     opacity: var(--hero-name-span-opacity);
+   }
+   .hero-desc {
+     max-width: 540px;
+     color: var(--muted);
+     font-size: 13px;
+     line-height: 1.9;
+     margin-bottom: 2.5rem;
+     opacity: 0;
+     animation: fadeUpDesc 0.6s ease 0.5s forwards;
+   }
+   @keyframes fadeUpDesc {
+     from { opacity: 0; transform: translateY(16px); }
+     to { opacity: var(--hero-desc-opacity); transform: translateY(0); }
+   }
+   .hero-cta {
+     display: flex;
+     gap: 1rem;
+     flex-wrap: wrap;
+     opacity: 0;
+     animation: fadeUp 0.6s ease 0.65s forwards;
+   }
+   .btn {
+     display: inline-block;
+     padding: 0.65rem 1.5rem;
+     font-family: var(--mono);
+     font-size: 12px;
+     letter-spacing: 0.06em;
+     text-transform: uppercase;
+     text-decoration: none;
+     border-radius: 4px;
+     transition: all 0.2s;
+     cursor: pointer;
+   }
+   .btn-primary {
+     background: var(--accent);
+     color: #0a0a0f;
+     font-weight: 600;
+     border: 1px solid var(--accent);
+   }
+   .btn-primary:hover {
+     background: transparent;
+     color: var(--accent);
+   }
+   .btn-ghost {
+     background: transparent;
+     color: var(--text);
+     border: 1px solid var(--border);
+   }
+   .btn-ghost:hover {
+     border-color: var(--accent);
+     color: var(--accent);
+   }
+
+
+   /* ── Section base ── */
+   section { padding: 5rem 0; }
+   .section-tag {
+     font-size: 11px;
+     letter-spacing: 0.15em;
+     text-transform: uppercase;
+     color: var(--accent);
+     margin-bottom: 0.75rem;
+   }
+   .section-title {
+     font-family: var(--display);
+     font-size: clamp(1.8rem, 4vw, 2.8rem);
+     font-weight: 800;
+     letter-spacing: -0.02em;
+     margin-bottom: 3rem;
+     line-height: 1.1;
+   }
+
+
+   /* ── Divider ── */
+   .divider {
+     border: none;
+     border-top: 1px solid var(--border);
+     margin: 0;
+   }
+
+
+   /* ── About ── */
+   .about-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 3rem;
+   }
+   .about-text { color: var(--muted); line-height: 1.9; }
+   .about-text p + p { margin-top: 1rem; }
+   .stats-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 1rem;
+     align-content: start;
+   }
+   .stat-card {
+     background: var(--surface);
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     padding: 1.25rem;
+   }
+   .stat-num {
+     font-family: var(--display);
+     font-size: 2rem;
+     font-weight: 800;
+     color: var(--accent);
+     line-height: 1;
+   }
+   .stat-label {
+     font-size: 11px;
+     color: var(--muted);
+     letter-spacing: 0.05em;
+     margin-top: 0.25rem;
+   }
+
+
+   /* ── Skills ── */
+   .skills-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+     gap: 1rem;
+   }
+   .skill-card {
+     background: var(--surface);
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     padding: 1.25rem;
+     transition: border-color 0.2s, transform 0.2s;
+   }
+   .skill-card:hover {
+     border-color: rgba(61,255,192,0.35);
+     transform: translateY(-2px);
+   }
+   .skill-cat {
+     font-size: 10px;
+     letter-spacing: 0.12em;
+     text-transform: uppercase;
+     color: var(--accent);
+     margin-bottom: 0.5rem;
+   }
+   .skill-list {
+     color: var(--muted);
+     font-size: 12px;
+     line-height: 2;
+   }
+
+
+   /* ── Experience ── */
+   .timeline { position: relative; }
+   .timeline::before {
+     content: '';
+     position: absolute;
+     left: 0;
+     top: 8px;
+     bottom: 0;
+     width: 1px;
+     background: var(--border);
+   }
+   .tl-item {
+     padding-left: 2rem;
+     padding-bottom: 2.5rem;
+     position: relative;
+   }
+   .tl-item::before {
+     content: '';
+     position: absolute;
+     left: -4px;
+     top: 8px;
+     width: 9px;
+     height: 9px;
+     border-radius: 50%;
+     background: var(--accent);
+     border: 2px solid var(--bg);
+     box-shadow: 0 0 8px var(--accent);
+   }
+   .tl-date {
+     font-size: 11px;
+     letter-spacing: 0.08em;
+     color: var(--accent);
+     margin-bottom: 0.25rem;
+   }
+   .tl-role {
+     font-family: var(--display);
+     font-size: 1.1rem;
+     font-weight: 700;
+     color: var(--text);
+     margin-bottom: 0.1rem;
+   }
+   .tl-company {
+     font-size: 12px;
+     color: var(--accent2);
+     margin-bottom: 0.75rem;
+   }
+   .tl-desc {
+     color: var(--muted);
+     font-size: 12px;
+     line-height: 1.9;
+   }
+   .tl-desc li {
+     margin-left: 1rem;
+     margin-bottom: 0.25rem;
+   }
+
+
+   /* ── Projects ── */
+   .projects-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 1.25rem;
+   }
+   .proj-card {
+     background: var(--surface);
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     padding: 1.5rem;
+     transition: border-color 0.2s, transform 0.2s;
+     position: relative;
+     overflow: hidden;
+   }
+   .proj-card::before {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: linear-gradient(135deg, rgba(61,255,192,0.03) 0%, transparent 60%);
+     pointer-events: none;
+   }
+   .proj-card:hover {
+     border-color: rgba(61,255,192,0.35);
+     transform: translateY(-3px);
+   }
+   .proj-title {
+     font-family: var(--display);
+     font-weight: 700;
+     font-size: 1rem;
+     margin-bottom: 0.5rem;
+   }
+   .proj-desc {
+     font-size: 12px;
+     color: var(--muted);
+     line-height: 1.8;
+     margin-bottom: 1rem;
+   }
+   .proj-tags {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 0.4rem;
+   }
+   .tag {
+     font-size: 10px;
+     letter-spacing: 0.06em;
+     text-transform: uppercase;
+     padding: 0.2rem 0.6rem;
+     border-radius: 3px;
+     background: rgba(61,255,192,0.07);
+     color: var(--accent);
+     border: 1px solid rgba(61,255,192,0.15);
+   }
+
+
+   /* ── Contact ── */
+   .contact-grid {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     gap: 3rem;
+     align-items: start;
+   }
+   .contact-info { color: var(--muted); line-height: 1.9; }
+   .contact-links {
+     display: flex;
+     flex-direction: column;
+     gap: 0.75rem;
+   }
+   .contact-link {
+     display: flex;
+     align-items: center;
+     gap: 0.75rem;
+     color: var(--text);
+     text-decoration: none;
+     font-size: 13px;
+     padding: 0.75rem 1rem;
+     background: var(--surface);
+     border: 1px solid var(--border);
+     border-radius: 6px;
+     transition: border-color 0.2s, color 0.2s;
+   }
+   .contact-link:hover {
+     border-color: rgba(61,255,192,0.35);
+     color: var(--accent);
+   }
+   .contact-link-icon {
+     color: var(--accent);
+     font-size: 14px;
+     min-width: 18px;
+   }
+
+
+   /* ── Footer ── */
+   footer {
+     padding: 2rem 0;
+     border-top: 1px solid var(--border);
+   }
+   .footer-inner {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     max-width: 900px;
+     margin: 0 auto;
+     padding: 0 2rem;
+     font-size: 11px;
+     color: var(--muted);
+     letter-spacing: 0.05em;
+   }
+
+
+   /* ── Scroll reveal ── */
+   .reveal {
+     opacity: 0;
+     transform: translateY(20px);
+     transition: opacity 0.6s ease, transform 0.6s ease;
+   }
+   .reveal.visible {
+     opacity: 1;
+     transform: none;
+   }
+
+
+   /* ── Animations ── */
+   @keyframes fadeUp {
+     to { opacity: 1; transform: translateY(0); }
+   }
+
+
+   /* ── Responsive ── */
+   @media (max-width: 640px) {
+     .about-grid, .contact-grid, .projects-grid { grid-template-columns: 1fr; }
+     .nav-links { display: none; }
+   }
+ </style>
+</head>
+<body>
+
+
+<canvas id="bg-canvas"></canvas>
+
+
+<!-- Navigation -->
+<nav>
+ <div class="nav-inner">
+   <a href="#hero" class="nav-logo">SS_</a>
+   <ul class="nav-links">
+     <li><a href="#about">About</a></li>
+     <li><a href="#skills">Skills</a></li>
+     <li><a href="#experience">Experience</a></li>
+     <li><a href="#projects">Projects</a></li>
+     <li><a href="#contact">Contact</a></li>
+   </ul>
+ </div>
+</nav>
+
+
+<!-- Hero -->
+<section id="hero">
+ <div id="hero-model-wrap">
+   <canvas id="hero-model-canvas"></canvas>
+   <div id="hero-model-fade"></div>
+ </div>
+ <div class="wrap">
+   <div class="hero-inner">
+     <p class="hero-tag">// Electronics &amp; Embedded Systems Engineer</p>
+     <h1 class="hero-name">
+       Syed<br>
+       <span>Sulaiman1.</span>
+     </h1>
+     <p class="hero-desc">
+       Building intelligent hardware at the intersection of robotics, motorsport, and embedded systems.
+       From Formula Student race car electronics to collaborative robot subsystems — I design the circuits
+       that make machines move.
+     </p>
+     <div class="hero-cta">
+       <a href="#projects" class="btn btn-primary">View Projects</a>
+       <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+       <a href="mailto:syedsulaiman0703@gmail.com" class="btn btn-ghost">Download CV</a>
+     </div>
+   </div>
+ </div>
+</section>
+
+
+<hr class="divider">
+
+
+<!-- About -->
+<section id="about">
+ <div class="wrap">
+   <p class="section-tag reveal">// 001</p>
+   <h2 class="section-title reveal">About Me</h2>
+   <div class="about-grid">
+     <div class="about-text reveal">
+       <p>
+         I'm a final-year Electronics &amp; Communications Engineering student at PES University, Bangalore,
+         with a deep focus on embedded systems, control theory, and mechatronics for high-performance applications.
+       </p>
+       <p>
+         As Electrical Lead of <strong style="color:var(--text)">Vega Racing Electric</strong>, I built a Formula Student
+         race car's complete electrical architecture from scratch — accumulator systems, safety circuits, VCU, and real-time
+         telemetry. The team cleared Electrical Technical Inspection at Formula Bharat in their debut year.
+       </p>
+       <p>
+         Currently at <strong style="color:var(--text)">Systemantics India</strong>, designing PCB subsystems
+         for collaborative robots: stepper motor drivers, force-torque sensing modules, LVDT controllers, and
+         machine vision illumination systems.
+       </p>
+       <p>
+         Published researcher in indoor robot localization, achieving the lowest RMSE across 5 datasets — outperforming
+         ORB-SLAM3, VINS-Mono, and VIW-Fusion.
+       </p>
+     </div>
+     <div class="stats-grid reveal">
+       <div class="stat-card">
+         <div class="stat-num">8.77</div>
+         <div class="stat-label">GPA / 10</div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-num">3+</div>
+         <div class="stat-label">Years Formula Student</div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-num">J.1</div>
+         <div class="stat-label">Journal Publication</div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-num">60%</div>
+         <div class="stat-label">Nav drift reduction</div>
+       </div>
+     </div>
+   </div>
+ </div>
+</section>
+
+
+<hr class="divider">
+
+
+<!-- Skills -->
+<section id="skills">
+ <div class="wrap">
+   <p class="section-tag reveal">// 002</p>
+   <h2 class="section-title reveal">Technical Skills</h2>
+   <div class="skills-grid">
+     <div class="skill-card reveal">
+       <div class="skill-cat">Languages</div>
+       <div class="skill-list">C / C++ / Embedded C<br>Python<br>Shell scripting<br>Java</div>
+     </div>
+     <div class="skill-card reveal">
+       <div class="skill-cat">PCB & EDA</div>
+       <div class="skill-list">KiCad<br>Altium Designer<br>EasyEDA<br>LTspice</div>
+     </div>
+     <div class="skill-card reveal">
+       <div class="skill-cat">Embedded Platforms</div>
+       <div class="skill-list">STM32 / STM32CubeIDE<br>ESP32 / Arduino<br>Raspberry Pi<br>FreeRTOS</div>
+     </div>
+     <div class="skill-card reveal">
+       <div class="skill-cat">Protocols</div>
+       <div class="skill-list">CAN Bus<br>I2C / SPI / USART<br>Modbus<br>LoRa</div>
+     </div>
+     <div class="skill-card reveal">
+       <div class="skill-cat">Robotics</div>
+       <div class="skill-list">ROS / RViz / Gazebo<br>MoveIt<br>AprilTag / Fiducials<br>EKF Localisation</div>
+     </div>
+     <div class="skill-card reveal">
+       <div class="skill-cat">Simulation & CV</div>
+       <div class="skill-list">MATLAB / Simulink<br>OpenCV / YOLO<br>PyTorch / TensorFlow<br>Fusion 360</div>
+     </div>
+   </div>
+ </div>
+</section>
+
+
+<hr class="divider">
+
+
+<!-- Experience -->
+<section id="experience">
+ <div class="wrap">
+   <p class="section-tag reveal">// 003</p>
+   <h2 class="section-title reveal">Experience</h2>
+   <div class="timeline">
+
+
+     <div class="tl-item reveal">
+       <div class="tl-date">Jan 2025 – Present</div>
+       <div class="tl-role">Associate Design Engineer – Robotics</div>
+       <div class="tl-company">Systemantics India Pvt Ltd</div>
+       <div class="tl-desc">
+         <ul>
+           <li>End-to-end PCB design for stepper motor driver, force-torque sensing, LVDT controller modules</li>
+           <li>Led metrology station for turbine blade inspection using LVDT precision measurement</li>
+           <li>STM32 closed-loop stepper control with encoder feedback</li>
+           <li>Machine vision dome illumination system for automated jet engine inspection</li>
+         </ul>
+       </div>
+     </div>
+
+
+     <div class="tl-item reveal">
+       <div class="tl-date">2022 – 2025</div>
+       <div class="tl-role">Electrical Lead</div>
+       <div class="tl-company">Vega Racing Electric, PES University</div>
+       <div class="tl-desc">
+         <ul>
+           <li>Designed full electrical architecture of a Formula Student electric race car from scratch</li>
+           <li>Accumulator system, HV/LV subsystems, safety circuits — Formula Bharat compliant</li>
+           <li>Motor controller integration, torque calibration &amp; throttle mapping</li>
+           <li>Cleared Electrical TI at Formula Bharat as a first-year team</li>
+         </ul>
+       </div>
+     </div>
+
+
+     <div class="tl-item reveal">
+       <div class="tl-date">Jun – Aug 2024</div>
+       <div class="tl-role">Robotics Intern</div>
+       <div class="tl-company">AIRL, Indian Institute of Science</div>
+       <div class="tl-desc">
+         <ul>
+           <li>Multi-UUV simulation in ROS &amp; Gazebo for swarm robotics experiments</li>
+           <li>Distributed area-search coverage simulation for an underwater robot swarm</li>
+         </ul>
+       </div>
+     </div>
+
+
+     <div class="tl-item reveal">
+       <div class="tl-date">Jun – Jul 2023</div>
+       <div class="tl-role">Design Intern</div>
+       <div class="tl-company">Systemantics India Pvt Ltd</div>
+       <div class="tl-desc">
+         <ul>
+           <li>Evaluated 10+ depth camera systems for robot wrist-mounted vision</li>
+           <li>Raspberry Pi Camera HAT with ToF distance &amp; LED flash support board</li>
+         </ul>
+       </div>
+     </div>
+
+
+   </div>
+ </div>
+</section>
+
+
+<hr class="divider">
+
+
+<!-- Projects -->
+<section id="projects">
+ <div class="wrap">
+   <p class="section-tag reveal">// 004</p>
+   <h2 class="section-title reveal">Projects</h2>
+   <div class="projects-grid">
+
+
+     <div class="proj-card reveal">
+       <div class="proj-title">Formula Student VCU &amp; Telemetry</div>
+       <div class="proj-desc">
+         ESP32-based vehicle data acquisition streaming 50+ parameters in real time.
+         CAN Bus integration with BMS &amp; motor controller, driver GUI, ground-station with GPS tracking.
+       </div>
+       <div class="proj-tags">
+         <span class="tag">ESP32</span><span class="tag">CAN Bus</span>
+         <span class="tag">LoRa</span><span class="tag">Embedded C</span><span class="tag">GPS</span>
+       </div>
+     </div>
+
+
+<<<<<<< HEAD
+     <div class="pblock-sub">Key Highlights</div>
+     <div class="pfeat">
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Multi-sensor fusion — EKF (Vision + IMU + Encoders)</div>
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Lane detection + AprilTag landmark correction</div>
+       <div class="pfeat-item p"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Outperformed ORB-SLAM3, VINS-Mono, VIW-Fusion</div>
+       <div class="pfeat-item p"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Validated on real warehouse datasets + Gazebo simulation</div>
+       <div class="pfeat-item a"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Industry-tested with Accio Robotics</div>
+     </div>
+
+
+     <div class="pblock-sub">Key Innovations</div>
+     <ul class="pbullets">
+       <li><strong>Hybrid Landmark Fusion</strong> — Combined lane features and fiducial markers to provide complementary corrections depending on environmental visibility</li>
+       <li><strong>Continuous Drift Correction</strong> — Applied real-time pose corrections throughout motion, avoiding accumulation of global error</li>
+       <li><span><strong>Robustness to Real World Conditions</strong> — Maintained performance under lighting variations (darkness, glare, transitions), partial landmark visibility, and feature-poor warehouse corridor environments</span></li>
+       <li><strong>Flexible Deployment</strong> — Works without strict marker placement or structured map requirements</li>
+     </ul>
+
+
+     <div class="pblock-sub">System Capabilities</div>
+     <div class="pfeat">
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Real-time localization with low-cost sensor suite</div>
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Correction of drift in X, Y, and yaw during motion</div>
+       <div class="pfeat-item r"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Recovery from Kidnapped Robot problem</div>
+       <div class="pfeat-item r"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Handles Infinite Corridor problem</div>
+       <div class="pfeat-item p"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Adaptable to different warehouse layouts and varying landmark density</div>
+     </div>
+
+
+     <div class="pblock-sub">Validation &amp; Deployment</div>
+     <ul class="pbullets">
+       <li>Tested on real warehouse datasets and Gazebo simulation environments</li>
+       <li>Evaluated across multi-loop trajectories, curved paths, variable lighting conditions</li>
+       <li>Industry validation in collaboration with <strong>Accio Robotics</strong></li>
+     </ul>
+
+
+     <p style="margin-top:1rem;"><strong>Outcome:</strong> Delivered a scalable and robust localization framework that significantly improves odometry accuracy in structured indoor environments, while remaining computationally efficient and deployable on low-cost robotic platforms.</p>
+
+
+     <div class="ptags">
+       <span class="ptag">ROS</span><span class="ptag">EKF</span><span class="ptag">AprilTag</span>
+       <span class="ptag">OpenCV</span><span class="ptag">Python</span><span class="ptag">Gazebo</span>
+     </div>
+   </div>
+
+
+   <!-- ════════════════════════════════════
+        02 · FORMULA STUDENT ELECTRIC RACE CAR
+   ════════════════════════════════════ -->
+   <div class="proj-chapter reveal">
+     <span class="proj-chapter-num">02 //</span>
+     <h3 class="proj-chapter-title">Formula Student Electric Race Car</h3>
+     <div class="proj-chapter-line"></div>
+   </div>
+
+
+   <div class="pblock-img">
+   <img src="images/formula_car.jpg" alt="Formula Student Electric Race Car"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+   <div class="img-ph">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/></svg>
+       formula_car.png
+   </div>
+   </div>
+
+
+   <div class="pblock reveal">
+     <div class="pblock-cat">Electrical Lead · Vega Racing Electric · 2022–2025 · PES University </div>
+     <h3 class="pblock-title">Project Overview — Complete Electrical Architecture</h3>
+
+
+     <p>Led the end-to-end design, development, and validation of the complete electrical system for a Formula Student electric race car. The system encompassed high-voltage energy storage, low-voltage safety-critical circuits, and embedded vehicle control systems, designed to operate reliably under high-performance automotive conditions while complying with strict Formula Student EV regulations.</p>
+     <p>The vehicle successfully <strong>cleared Electrical Technical Inspection at Formula Bharat in its debut year</strong>, validating both design integrity and system robustness.</p>
+
+
+     <div class="pblock-sub">System-Level Responsibility</div>
+     <div class="pfeat">
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Owned complete electrical architecture (HV + LV + VCU)</div>
+       <div class="pfeat-item g"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Led cross-domain integration — mechanical, firmware, controls</div>
+       <div class="pfeat-item a"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>DFMEA and failure-mode analysis across all critical subsystems</div>
+       <div class="pfeat-item p"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Established design validation workflows and debugging methodologies</div>
+       <div class="pfeat-item r"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Full rule compliance — Formula Student EV rulebook</div>
+     </div>
+
+
+     <div class="pblock-sub">Formula Student Rule Compliance</div>
+     <div class="rule-chips">
+       <span class="rule-chip">UL94V0 Rated — Everything</span>
+       <span class="rule-chip">HV/LV Isolation</span>
+       <span class="rule-chip">Rigid Mounting — No Moving Parts</span>
+       <span class="rule-chip">Positive Locking Fasteners</span>
+       <span class="rule-chip">Highest-Rated Locking Connectors</span>
+       <span class="rule-chip">HV Connector Interlocks → Opens SDC</span>
+     </div>
+
+
+     <div class="ptags" style="margin-top:1.5rem;">
+       <span class="ptag">72V HV System</span><span class="ptag">Li-ion 42Ah</span>
+       <span class="ptag">DFMEA</span><span class="ptag am">Formula Bharat — ETI Cleared</span>
+     </div>
+   </div>
+
+
+   <!-- HV subsystem bar -->
+   <div class="sys-bar hv reveal">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+     <span class="sys-bar-txt">High Voltage System</span>
+   </div>
+
+
+   <!-- Accumulator -->
+   <div class="pblock reveal">
+     <div class="pblock-cat">Accumulator Design</div>
+     <h3 class="pblock-title">Accumulator Architecture &amp; Design</h3>
+
+
+     <p>Designed a <strong>72V nominal (84V max) lithium-ion accumulator</strong>. Configuration: 2 × 10s10p (200 cells), 42Ah capacity, 200A maximum discharge current.</p>
+
+
+     <div class="pblock-split">
+       <div>
+         <div class="pblock-sub">Integrated Components</div>
+         <ul class="pbullets">
+           <li>Accumulator Isolation Relays (AIRs)</li>
+           <li>Battery Management System (BMS)</li>
+           <li>Voltage and Current Sensors</li>
+           <li>High-speed fuse protection — 200A, 40kA interrupt rating</li>
+           <li>High-voltage connectors and busbars</li>
+           <li>Required safety circuits and control electronics</li>
+         </ul>
+         <div class="pfeat" style="margin-top:1rem;">
+           <div class="pfeat-item a"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>72V / 84V Max</div>
+           <div class="pfeat-item a"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>200 Cells · 42Ah</div>
+           <div class="pfeat-item a"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>200A / 40kA Fuse</div>
+         </div>
+        <div class="ptags">
+           <span class="ptag">Li-ion Pack</span><span class="ptag">BMS</span>
+           <span class="ptag">AIR Relays</span><span class="ptag">HV Bus</span><span class="ptag">200 Cells</span>
+        </div>
+=======
+     <div class="proj-card reveal">
+       <div class="proj-title">WareOdo — Warehouse Robot Localisation</div>
+       <div class="proj-desc">
+         EKF-based odometry correction fusing wheel encoders, IMU &amp; monocular vision.
+         AprilTag loop-closure reduced navigation drift ~60%. Outperformed ORB-SLAM3 across 5 datasets.
+>>>>>>> parent of 6b8c459 (Website V1)
+       </div>
+       <div class="proj-tags">
+         <span class="tag">ROS</span><span class="tag">EKF</span>
+         <span class="tag">AprilTag</span><span class="tag">Published</span>
+       </div>
+     </div>
+
+
+     <div class="proj-card reveal">
+       <div class="proj-title">Autonomous Farming Robot</div>
+       <div class="proj-desc">
+         CNC-based Cartesian farming robot for automated planting, watering and crop monitoring.
+         Custom PCB with soil/environmental sensors and IoT remote control interface.
+       </div>
+       <div class="proj-tags">
+         <span class="tag">Arduino</span><span class="tag">CNC</span>
+         <span class="tag">PCB Design</span><span class="tag">IoT</span>
+       </div>
+     </div>
+
+
+     <div class="proj-card reveal">
+       <div class="proj-title">Omnidirectional Robot Platform</div>
+       <div class="proj-desc">
+         3D-printed Mecanum wheel robot with full 360° motion. Multi-mode control via Bluetooth, RF &amp; web.
+         Embedded motion recording &amp; replay. 2nd Prize at HackeZee hardware contest.
+       </div>
+       <div class="proj-tags">
+         <span class="tag">Mecanum</span><span class="tag">PCB</span>
+         <span class="tag">Bluetooth</span><span class="tag">Motor Control</span>
+       </div>
+     </div>
+
+
+   </div>
+ </div>
+</section>
+
+
+<hr class="divider">
+
+
+<!-- Contact -->
+<section id="contact">
+ <div class="wrap">
+   <p class="section-tag reveal">// 005</p>
+   <h2 class="section-title reveal">Get In Touch</h2>
+   <div class="contact-grid">
+     <div class="contact-info reveal">
+       <p>
+         I'm currently open to graduate study opportunities in motorsport mechatronics and high-performance
+         vehicle engineering, as well as roles in embedded systems and robotics.
+       </p>
+       <br>
+       <p>Based in Bangalore, India. Happy to connect.</p>
+     </div>
+     <div class="contact-links reveal">
+       <a href="mailto:syedsulaiman0703@gmail.com" class="contact-link">
+         <span class="contact-link-icon">✉</span>
+         syedsulaiman0703@gmail.com
+       </a>
+       <a href="https://linkedin.com/in/syed-sulaiman7" class="contact-link" target="_blank">
+         <span class="contact-link-icon">in</span>
+         linkedin.com/in/syed-sulaiman7
+       </a>
+       <a href="tel:+919845379826" class="contact-link">
+         <span class="contact-link-icon">#</span>
+         +91 98453 79826
+       </a>
+       <a href="https://github.com" class="contact-link" target="_blank">
+         <span class="contact-link-icon">&lt;/&gt;</span>
+         GitHub (add your username)
+       </a>
+     </div>
+   </div>
+ </div>
+</section>
+
+
+<!-- Footer -->
+<footer>
+ <div class="footer-inner">
+   <span>© 2025 Syed Sulaiman</span>
+   <span>Built with HTML · Hosted on GitHub Pages</span>
+ </div>
+</footer>
+
+
+<!-- Three.js + GLTFLoader (single source, Chrome-safe) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function() {
+ const canvas = document.getElementById('bg-canvas');
+ const renderer = new THREE.WebGLRenderer({
+   canvas,
+   alpha: true,
+   antialias: true,
+   powerPreference: 'default',       // Chrome needs this explicit
+   failIfMajorPerformanceCaveat: false
+ });
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+ renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+ const scene = new THREE.Scene();
+ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+ camera.position.set(0, 0, 30);
+
+
+ // Floating nodes (PCB solder points)
+ const nodeGeo = new THREE.SphereGeometry(0.18, 8, 8);
+ const nodeMat = new THREE.MeshBasicMaterial({ color: 0x3dffc0 });
+ const nodes = [];
+ const nodePositions = [];
+ const count = 80;
+
+
+ for (let i = 0; i < count; i++) {
+   const mesh = new THREE.Mesh(nodeGeo, nodeMat.clone());
+   const x = (Math.random() - 0.5) * 70;
+   const y = (Math.random() - 0.5) * 50;
+   const z = (Math.random() - 0.5) * 20 - 5;
+   mesh.position.set(x, y, z);
+   scene.add(mesh);
+   nodes.push(mesh);
+   nodePositions.push({ x, y, z, vx: (Math.random()-0.5)*0.008, vy: (Math.random()-0.5)*0.008 });
+ }
+
+
+ // Connecting lines (PCB traces)
+ const lineMat = new THREE.LineBasicMaterial({ color: 0x3dffc0, transparent: true, opacity: 0.12 });
+ const lineGroup = new THREE.Group();
+ scene.add(lineGroup);
+
+
+ function buildLines() {
+   while (lineGroup.children.length) {
+     lineGroup.remove(lineGroup.children[0]);
+   }
+   for (let i = 0; i < count; i++) {
+     for (let j = i + 1; j < count; j++) {
+       const a = nodes[i].position;
+       const b = nodes[j].position;
+       const dist = a.distanceTo(b);
+       if (dist < 10) {
+         const geo = new THREE.BufferGeometry().setFromPoints([a.clone(), b.clone()]);
+         const line = new THREE.Line(geo, lineMat);
+         lineGroup.add(line);
+       }
+     }
+   }
+ }
+
+
+ // IC chip placeholders (flat boxes)
+ const chipMat = new THREE.MeshBasicMaterial({ color: 0x1a1a2e, wireframe: false });
+ const chipEdge = new THREE.MeshBasicMaterial({ color: 0x3dffc0, wireframe: true });
+ const chipPositions = [
+   [-10, 5, -8], [8, -6, -10], [-4, -12, -6], [14, 10, -12], [-16, -4, -9]
+ ];
+ chipPositions.forEach(([x,y,z]) => {
+   const w = 3 + Math.random() * 2;
+   const h = 2 + Math.random() * 1.5;
+   const geo = new THREE.BoxGeometry(w, h, 0.3);
+   const chip = new THREE.Mesh(geo, chipMat);
+   const edge = new THREE.Mesh(geo, chipEdge);
+   chip.position.set(x, y, z);
+   edge.position.set(x, y, z);
+   chip.rotation.z = (Math.random() - 0.5) * 0.3;
+   edge.rotation.z = chip.rotation.z;
+   scene.add(chip);
+   scene.add(edge);
+ });
+
+
+ // Mouse parallax
+ let mx = 0, my = 0;
+ window.addEventListener('mousemove', e => {
+   mx = (e.clientX / window.innerWidth - 0.5) * 2;
+   my = (e.clientY / window.innerHeight - 0.5) * 2;
+ });
+
+
+ window.addEventListener('resize', () => {
+   camera.aspect = window.innerWidth / window.innerHeight;
+   camera.updateProjectionMatrix();
+   renderer.setSize(window.innerWidth, window.innerHeight);
+ });
+
+
+ let frame = 0;
+ function animate() {
+   requestAnimationFrame(animate);
+   frame++;
+
+
+   // Drift nodes
+   nodePositions.forEach((p, i) => {
+     p.x += p.vx;
+     p.y += p.vy;
+     if (Math.abs(p.x) > 35) p.vx *= -1;
+     if (Math.abs(p.y) > 25) p.vy *= -1;
+     nodes[i].position.set(p.x, p.y, p.z);
+   });
+
+
+   // Rebuild lines every 30 frames
+   if (frame % 30 === 0) buildLines();
+
+
+   // Mouse parallax camera
+   camera.position.x += (mx * 2 - camera.position.x) * 0.03;
+   camera.position.y += (-my * 1.5 - camera.position.y) * 0.03;
+   camera.lookAt(0, 0, 0);
+
+
+   renderer.render(scene, camera);
+ }
+
+
+ buildLines();
+ animate();
+})();
+</script>
+
+
+<!-- Scroll reveal -->
+<script>
+(function() {
+ const obs = new IntersectionObserver((entries) => {
+   entries.forEach(e => {
+     if (e.isIntersecting) {
+       e.target.classList.add('visible');
+       obs.unobserve(e.target);
+     }
+   });
+ }, { threshold: 0.12 });
+
+
+ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+</script>
+
+
+<!-- PCB 3D model in hero — loads AFTER page is fully rendered -->
+<script>
+(function() {
+ const canvas = document.getElementById('hero-model-canvas');
+ if (!canvas) return;
+
+
+ // Wait for the full page to load first, then start the model
+ // This ensures hero text, nav, and all sections are painted before
+ // the GPU is handed to the GLB loader.
+ function startWhenReady() {
+   // requestIdleCallback fires when the browser is idle after load.
+   // Fallback to setTimeout 1500ms for Safari which doesn't support it.
+   if ('requestIdleCallback' in window) {
+     requestIdleCallback(init, { timeout: 2000 });
+   } else {
+     setTimeout(init, 1500);
+   }
+ }
+
+
+ if (document.readyState === 'complete') {
+   startWhenReady();
+ } else {
+   window.addEventListener('load', startWhenReady);
+ }
+
+
+ function init() {
+   // Both <script> tags are synchronous so by window 'load' they're
+   // guaranteed executed. No polling loop needed (that's what broke Chrome).
+   if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
+     console.warn('GLTFLoader unavailable — PCB model skipped');
+     return;
+   }
+
+
+   const renderer = new THREE.WebGLRenderer({
+     canvas,
+     alpha: true,
+     antialias: true,
+     powerPreference: 'default',
+     failIfMajorPerformanceCaveat: false
+   });
+   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+   renderer.physicallyCorrectLights = true;
+   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+   renderer.toneMappingExposure = 1.2;
+
+
+   function resize() {
+     const w = canvas.clientWidth;
+     const h = canvas.clientHeight;
+     renderer.setSize(w, h, false);
+     camera.aspect = w / h;
+     camera.updateProjectionMatrix();
+   }
+
+
+   const scene = new THREE.Scene();
+   const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+   camera.position.set(0, 0, 5);
+
+
+   // Lighting — bright white ambient + strong key + purple fill
+   const ambient = new THREE.AmbientLight(0xffffff, 6);
+   scene.add(ambient);
+
+
+   const keyLight = new THREE.DirectionalLight(0xffffff, 6.0);
+   keyLight.position.set(10, 10, 5);
+   scene.add(keyLight);
+
+
+   const fillLight = new THREE.DirectionalLight(0xa78bfa, 5.0);
+   fillLight.position.set(-4, -2, 3);
+   scene.add(fillLight);
+
+
+   const rimLight = new THREE.DirectionalLight(0xffffff, 6.0);
+   rimLight.position.set(0, -5, -3);
+   scene.add(rimLight);
+
+
+   let model = null;
+   let mixer = null;
+   const loader = new THREE.GLTFLoader();
+
+
+   loader.load(
+     './SYSCON2.glb',
+     function(gltf) {
+       model = gltf.scene;
+
+
+       const box = new THREE.Box3().setFromObject(model);
+       const centre = box.getCenter(new THREE.Vector3());
+       const size = box.getSize(new THREE.Vector3());
+       const maxDim = Math.max(size.x, size.y, size.z);
+       const scale = 2.8 / maxDim;
+
+
+       model.position.sub(centre);
+       model.scale.setScalar(scale);
+
+
+       model.traverse(child => {
+         if (child.isMesh && child.material) {
+           const mats = Array.isArray(child.material) ? child.material : [child.material];
+           mats.forEach(mat => {
+             mat.envMapIntensity = 1.0;
+             if (mat.metalness !== undefined) mat.metalness = Math.min(mat.metalness + 0.1, 1);
+           });
+         }
+       });
+
+
+       model.rotation.x = 0.3;
+       model.rotation.y = -0.4;
+       scene.add(model);
+
+
+       if (gltf.animations && gltf.animations.length) {
+         mixer = new THREE.AnimationMixer(model);
+         gltf.animations.forEach(clip => mixer.clipAction(clip).play());
+       }
+     },
+     undefined,
+     function(err) { console.warn('GLB load error:', err); }
+   );
+
+
+   // ── Flip animation state machine ──────────────────────────────
+   // Phase 0: rotating top-side up  (duration: ROTATE_DURATION)
+   // Phase 1: flipping to bottom    (duration: FLIP_DURATION)
+   // Phase 2: rotating bottom-side  (duration: ROTATE_DURATION)
+   // Phase 3: flipping back to top  (duration: FLIP_DURATION)
+   const ROTATE_DURATION = 6.0;   // seconds each side stays visible
+   const FLIP_DURATION   = 1.4;   // seconds the flip transition takes
+
+
+   let phase = 0;
+   let phaseStart = 0;            // elapsed time when current phase began
+   let baseRotY = -0.4;           // y-rotation accumulator between phases
+   let flipStartX = 0.3;          // x-rotation at start of flip
+   let flipTargetX = Math.PI + 0.3; // x-rotation at end of first flip
+
+
+   // Smooth easing
+   function easeInOut(t) {
+     return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+   }
+
+
+   // Mouse parallax tracking
+   let targetX = 0, targetY = 0;
+   let currentX = 0, currentY = 0;
+   window.addEventListener('mousemove', e => {
+     targetX = (e.clientX / window.innerWidth - 0.5) * 0.6;
+     targetY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+   });
+
+
+   const clock = new THREE.Clock();
+
+
+   window.addEventListener('resize', resize);
+   resize();
+
+
+   function animate() {
+     requestAnimationFrame(animate);
+     const delta = clock.getDelta();
+     const elapsed = clock.elapsedTime;
+
+
+     if (mixer) mixer.update(delta);
+
+
+     if (model) {
+       // Smooth mouse parallax
+       currentX += (targetX - currentX) * 0.04;
+       currentY += (targetY - currentY) * 0.04;
+
+
+       const t = elapsed - phaseStart; // time within current phase
+
+
+       if (phase === 0 || phase === 2) {
+         // ── Rotating phase ──
+         // Slow Y spin + gentle float bob
+         model.rotation.y = baseRotY + t * 0.18 + currentX * 0.5;
+         model.rotation.x = flipStartX + Math.sin(t * 0.4) * 0.06 - currentY * 0.3;
+         model.position.y = Math.sin(t * 0.6) * 0.12;
+
+
+         if (t >= ROTATE_DURATION) {
+           // Snapshot y-rotation so flip starts from current angle
+           baseRotY = model.rotation.y;
+           flipStartX = model.rotation.x;
+           flipTargetX = flipStartX + Math.PI; // flip 180° on X axis
+           phaseStart = elapsed;
+           phase = phase === 0 ? 1 : 3;
+         }
+
+
+       } else {
+         // ── Flip transition phase ──
+         const p = Math.min(t / FLIP_DURATION, 1.0);
+         const e = easeInOut(p);
+
+
+         model.rotation.x = flipStartX + e * Math.PI;
+         // Keep a slow drift during flip so it doesn't freeze in Y
+         model.rotation.y = baseRotY + t * 0.08 + currentX * 0.5;
+         model.position.y = Math.sin(p * Math.PI) * 0.25; // slight arc
+
+
+         if (p >= 1.0) {
+           // Flip done — update base state for next rotate phase
+           flipStartX = model.rotation.x;
+           baseRotY = model.rotation.y;
+           phaseStart = elapsed;
+           phase = phase === 1 ? 2 : 0;
+         }
+       }
+     }
+
+
+     renderer.render(scene, camera);
+   }
+
+
+   animate();
+ }
+
+
+ init();
+})();
+</script>
+
+
+</body>
+</html>
+

@@ -33,7 +33,7 @@
       --hero-desc-opacity: 0.995;
     }
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    html { scroll-behavior:smooth; }
+    html {min-width: 980px; scroll-behavior:smooth; }
     body {
       background:var(--bg); color:var(--text);
       font-family:var(--mono); font-size:14px; line-height:1.8; overflow-x:hidden;
@@ -67,7 +67,7 @@
       border-bottom:1px solid var(--border);
     }
     .nav-inner {
-      max-width:980px; margin:0 auto; padding:0 2.5rem;
+      max-width:1300px; margin:0 auto; padding:0 2.5rem;
       height:56px; display:flex; align-items:center; justify-content:space-between;
     }
     .nav-logo {
