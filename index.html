@@ -838,6 +838,180 @@
     body.loading > #cur-dot,
     body.loading > #cur-ring { visibility: hidden; }
 
+
+    /* ══════════════════════════════
+       ACCUMULATOR IMAGE SLIDER
+    ══════════════════════════════ */
+    .acc-slider {
+      position: relative;
+      width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surf2);
+      /* GPU compositing layer for smooth animation */
+      will-change: transform;
+      container-type: inline-size;
+    }
+
+    /* Track holds all slides side by side */
+    .acc-track {
+      display: flex;
+      transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+      will-change: transform;
+    }
+
+    /* Each slide */
+    .acc-slide {
+      min-width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .acc-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      opacity: .88;
+      transition: opacity .35s, transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    .acc-slide img:hover { opacity: 1; }
+
+    /* Zoom-in effect on active slide */
+    .acc-slide.is-active img {
+      transform: scale(1.03);
+    }
+    .acc-slide:not(.is-active) img {
+      transform: scale(1);
+    }
+
+    /* Caption overlay — slides up on hover */
+    .acc-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: .6rem 1rem;
+      background: linear-gradient(to top, rgba(8,8,14,0.92) 0%, transparent 100%);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transform: translateY(100%);
+      transition: transform 0.35s ease;
+      pointer-events: none;
+    }
+    .acc-slider:hover .acc-caption { transform: translateY(0); }
+
+    /* Image counter badge */
+    .acc-counter {
+      position: absolute;
+      top: 10px; right: 12px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .1em;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0);
+      backdrop-filter: blur(8px);
+      padding: .2rem .55rem;
+      border: 1px solid rgba(61,255,192,0.2);
+      border-radius: 2px;
+      z-index: 5;
+    }
+
+    /* Prev / Next arrow buttons */
+    .acc-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      z-index: 10;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(8,8,14,0.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(61,255,192,0.22);
+      border-radius: 3px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: background .2s, border-color .2s, box-shadow .2s;
+      opacity: 0;
+      transition: opacity .25s, background .2s, box-shadow .2s;
+    }
+    .acc-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.2; fill: none; }
+    .acc-btn.prev { left: 10px; }
+    .acc-btn.next { right: 10px; }
+    .acc-slider:hover .acc-btn { opacity: 1; }
+    .acc-btn:hover {
+      background: rgba(61,255,192,0.12);
+      border-color: var(--accent);
+      box-shadow: 0 0 18px rgba(61,255,192,0.25);
+    }
+
+    /* Dot indicators */
+    .acc-dots {
+      position: absolute;
+      bottom: 10px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 6px;
+      z-index: 5;
+    }
+    .acc-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(61,255,192,0.25);
+      border: 1px solid rgba(61,255,192,0.4);
+      cursor: pointer;
+      transition: background .3s, transform .3s, width .3s;
+    }
+    .acc-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      width: 18px;
+      border-radius: 3px;
+    }
+
+    /* Progress bar at top of slider */
+    .acc-progress {
+      position: absolute;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      z-index: 6;
+      width: 0%;
+      transition: width linear;
+    }
+
+    /* Scanline overlay for cyberpunk feel */
+    .acc-scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0.5;
+    }
+
+    /* Touch swipe hint — visible briefly on mobile */
+    .acc-swipe-hint {
+      position: absolute;
+      bottom: 28px; left: 50%; transform: translateX(-50%);
+      font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(61,255,192,0.45);
+      z-index: 6;
+      animation: swipeHintFade 2.5s ease 1.5s forwards;
+      white-space: nowrap;
+    }
+    @keyframes swipeHintFade {
+      0%  { opacity: 1; }
+      80% { opacity: 1; }
+      100%{ opacity: 0; }
+    }
+
   </style>
 </head>
 <body class="loading">
@@ -985,8 +1159,8 @@
     maybeHide();
   });
 
-  // Fallback: force-hide after 6s no matter what
-  setTimeout(dismissLoader, 6000);
+  // Fallback: force-hide after 8s no matter what
+  setTimeout(dismissLoader, 8000);
 })();
 </script>
 
@@ -1461,13 +1635,67 @@
             <span class="ptag">AIR Relays</span><span class="ptag">HV Bus</span><span class="ptag">200 Cells</span>
          </div>
         </div>
-        <div class="pblock-img" style="width:70%;">
-          <img src="images/accumulator.JPG" alt="Accumulator"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-          <div class="img-ph">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-            accumulator.jpg
+        <!-- ══ Accumulator Image Slider ══
+             To add/remove images: just add/remove .acc-slide divs.
+             Everything else (dots, counter, wrapping) is automatic.
+        -->
+        <div class="acc-slider" id="accSlider"
+             data-slider
+             data-autoplay-ms="4000"
+             aria-label="Accumulator images">
+
+          <!-- Auto-play progress bar -->
+          <div class="acc-progress"></div>
+
+          <!-- Counter badge -->
+          <div class="acc-counter"></div>
+
+          <!-- Slide track — add/remove .acc-slide blocks freely -->
+          <div class="acc-track">
+
+            <div class="acc-slide is-active">
+              <img src="images/accumulator.JPG" alt="Accumulator — Full Pack"
+                   onerror="this.style.display='none'"/>
+              <div class="acc-caption">Accumulator Pack · Full Assembly</div>
+            </div>
+
+            <div class="acc-slide">
+              <img src="images/battery1.JPG" alt="Accumulator — Cell Layout"
+                   onerror="this.style.display='none'"/>
+              <div class="acc-caption">Cell Layout · 2×10s10p · 200 Cells</div>
+            </div>
+
+            <div class="acc-slide">
+              <img src="images/battery2.JPG" alt="Accumulator — BMS & Wiring"
+                   onerror="this.style.display='none'"/>
+              <div class="acc-caption">BMS · AIR Relays · HV Bus</div>
+            </div>
+
+            <div class="acc-slide">
+              <img src="images/battery3.JPG" alt="Accumulator — Enclosure"
+                   onerror="this.style.display='none'"/>
+              <div class="acc-caption">Enclosure · Thermal Management</div>
+            </div>
+
+            <div class="acc-slide">
+              <img src="images/battery4.JPG" alt="Accumulator — Detail"
+                   onerror="this.style.display='none'"/>
+              <div class="acc-caption">Pack Detail · Busbar Assembly</div>
+            </div>
+
           </div>
+
+          <!-- Arrows -->
+          <button class="acc-btn prev" aria-label="Previous">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="acc-btn next" aria-label="Next">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <!-- Dots — built automatically by initSlider(), leave empty -->
+          <div class="acc-dots"></div>
+
         </div>
       </div>
     </div>
@@ -2280,6 +2508,143 @@ const FEATURES = {
     document.getElementById('row-shadow-blur').style.opacity = this.checked ? '1' : '0.35';
   });
 })();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     GLOBAL SLIDER ENGINE
+     Usage: call initSlider(sliderEl, { autoplayMs? }) on any
+     .acc-slider element. Dots are built automatically from
+     however many .acc-slide children exist — no hardcoded counts.
+════════════════════════════════════════════════════════════ -->
+<script>
+function initSlider(slider, opts) {
+  if (!slider) return;
+
+  const AUTOPLAY_MS = (opts && opts.autoplayMs) || 4000;
+
+  /* ── Query internal parts ── */
+  const track    = slider.querySelector('.acc-track');
+  const progress = slider.querySelector('.acc-progress');
+  const counter  = slider.querySelector('.acc-counter');
+  const btnPrev  = slider.querySelector('.acc-btn.prev');
+  const btnNext  = slider.querySelector('.acc-btn.next');
+  const dotsWrap = slider.querySelector('.acc-dots');
+
+  /* ── Derive slide count from the DOM — the single source of truth ── */
+  const slides = Array.from(track.querySelectorAll('.acc-slide'));
+  const SLIDE_COUNT = slides.length;
+  if (SLIDE_COUNT === 0) return;
+
+  /* ── Build dots dynamically — one per slide, no manual HTML needed ── */
+  dotsWrap.innerHTML = '';
+  const dots = slides.map((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'acc-dot' + (i === 0 ? ' active' : '');
+    d.dataset.idx = i;
+    dotsWrap.appendChild(d);
+    return d;
+  });
+
+  /* ── State ── */
+  let current = 0;
+  let timer   = null;
+  let paused  = false;
+
+  /* ── Update counter badge ── */
+  function updateCounter() {
+    if (counter) {
+      counter.textContent =
+        String(current + 1).padStart(2, '0') + ' / ' +
+        String(SLIDE_COUNT).padStart(2, '0');
+    }
+  }
+
+  /* ── Go to slide idx ── */
+  function goTo(idx) {
+    idx = ((idx % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT;
+    slides[current].classList.remove('is-active');
+    dots[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('is-active');
+    dots[current].classList.add('active');
+    track.style.transform = `translateX(-${current * 100}%)`;
+    updateCounter();
+    resetProgress();
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  /* ── Progress bar ── */
+  function resetProgress() {
+    if (!progress) return;
+    progress.style.transition = 'none';
+    progress.style.width = '0%';
+    progress.getBoundingClientRect(); // force reflow
+    if (!paused) {
+      progress.style.transition = `width ${AUTOPLAY_MS}ms linear`;
+      progress.style.width = '100%';
+    }
+  }
+
+  /* ── Autoplay ── */
+  function startAuto() {
+    clearInterval(timer);
+    timer = setInterval(next, AUTOPLAY_MS);
+    resetProgress();
+  }
+  function stopAuto() {
+    clearInterval(timer);
+    if (progress) progress.style.transition = 'none';
+  }
+
+  /* ── Wire controls ── */
+  if (btnPrev) btnPrev.addEventListener('click', () => { prev(); startAuto(); });
+  if (btnNext) btnNext.addEventListener('click', () => { next(); startAuto(); });
+
+  dots.forEach(d => {
+    d.addEventListener('click', () => { goTo(+d.dataset.idx); startAuto(); });
+  });
+
+  /* ── Pause on hover ── */
+  slider.addEventListener('mouseenter', () => { paused = true;  stopAuto(); });
+  slider.addEventListener('mouseleave', () => { paused = false; startAuto(); });
+
+  /* ── Touch / swipe ── */
+  let touchX = 0;
+  slider.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  slider.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); startAuto(); }
+  }, { passive: true });
+
+  /* ── Keyboard ── */
+  slider.setAttribute('tabindex', '0');
+  slider.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { next(); startAuto(); }
+    if (e.key === 'ArrowLeft')  { prev(); startAuto(); }
+  });
+
+  /* ── IntersectionObserver — pause when off-screen ── */
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) { paused = false; startAuto(); }
+        else                   { paused = true;  stopAuto(); }
+      });
+    }, { threshold: 0.4 }).observe(slider);
+  }
+
+  /* ── Init ── */
+  updateCounter();
+  startAuto();
+}
+
+/* Auto-init every .acc-slider on the page that has data-autoplay attribute,
+   or you can call initSlider(el) manually per element. */
+document.querySelectorAll('.acc-slider[data-slider]').forEach(el => {
+  initSlider(el, { autoplayMs: +(el.dataset.autoplayMs || 4000) });
+});
 </script>
 
 </body>
