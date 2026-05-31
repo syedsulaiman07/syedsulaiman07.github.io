@@ -325,6 +325,233 @@
     .tl-desc li { margin-left:1rem; margin-bottom:.2rem; }
     .tl-desc li::marker { color:var(--accent); }
 
+    /* ══════════════════════════════════════════════════════════
+       BENTO GRID — reusable experience/project visual layout
+       Usage: wrap a .tl-item in .bento-job, add .bento-grid inside
+       Copy the whole .bento-job block to reuse anywhere.
+    ══════════════════════════════════════════════════════════ */
+
+    /* Job wrapper — keeps the timeline dot/line but replaces the desc */
+    .bento-job { padding-left:2rem; padding-bottom:3rem; position:relative; }
+    .bento-job::before {
+      content:''; position:absolute; left:-4px; top:8px; width:9px; height:9px;
+      border-radius:50%; background:var(--accent); border:2px solid var(--bg);
+      box-shadow:0 0 10px var(--accent);
+    }
+    .bento-job-header { margin-bottom:1.6rem; }
+    .bento-job-header .tl-date { font-size:10px; letter-spacing:.1em; color:var(--accent); margin-bottom:.2rem; }
+    .bento-job-header .tl-role { font-family:var(--disp); font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:.1rem; }
+    .bento-job-header .tl-company { font-size:11px; color:var(--accent2); }
+
+    /* The grid itself */
+    .bento-grid {
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(180px, auto);
+      gap:12px;
+    }
+
+    /* Tile base */
+    .bt {
+      position:relative; overflow:hidden;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:10px;
+      padding:20px 22px 18px;
+      transition:border-color .3s, box-shadow .3s, transform .3s;
+      display:flex; flex-direction:column; justify-content:flex-end;
+    }
+    .bt:hover {
+      border-color:rgba(61,255,192,.35);
+      box-shadow:0 0 40px rgba(61,255,192,.07), 0 16px 40px rgba(0,0,0,.4);
+      transform:translateY(-3px);
+    }
+
+    /* Accent corner bracket — top-left on hover */
+    .bt::after {
+      content:''; position:absolute; top:0; left:0;
+      width:20px; height:20px;
+      border-top:2px solid var(--accent); border-left:2px solid var(--accent);
+      border-radius:10px 0 0 0;
+      opacity:0; transition:opacity .3s;
+    }
+    .bt:hover::after { opacity:.7; }
+
+    /* Span helpers (columns) */
+    .bt-c4  { grid-column:span 4; }
+    .bt-c6  { grid-column:span 6; }
+    .bt-c8  { grid-column:span 8; }
+    .bt-c12 { grid-column:span 12; }
+    /* Row span helpers */
+    .bt-r2  { grid-row:span 2; }
+
+    /* Text layer */
+    .bt-tag {
+      font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--accent); opacity:.65; margin-bottom:.35rem;
+    }
+    .bt-title {
+      font-family:var(--disp); font-size:.95rem; font-weight:700;
+      color:var(--text); line-height:1.25; margin-bottom:.5rem;
+    }
+    .bt-desc {
+      font-size:11.5px; color:var(--muted); line-height:1.75;
+    }
+    .bt-desc strong { color:var(--text); font-weight:700; }
+
+    /* Chips / protocol tags inside a tile */
+    .bt-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:.75rem; }
+    .bt-chip {
+      font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+      padding:3px 8px; border-radius:2px;
+      background:rgba(61,255,192,.07); border:1px solid rgba(61,255,192,.18);
+      color:var(--accent);
+    }
+    .bt-chip.v { background:rgba(167,139,250,.07); border-color:rgba(167,139,250,.2); color:var(--accent2); }
+    .bt-chip.r { background:rgba(255,107,107,.07); border-color:rgba(255,107,107,.2); color:var(--accent3); }
+    .bt-chip.y { background:rgba(245,158,11,.07); border-color:rgba(245,158,11,.2); color:var(--accent4); }
+
+    /* Visual layer — sits behind text */
+    .bt-vis {
+      position:absolute; inset:0; pointer-events:none;
+      z-index:0;
+    }
+    .bt > .bt-tag,
+    .bt > .bt-title,
+    .bt > .bt-desc,
+    .bt > .bt-chips,
+    .bt > .bt-feat-list { position:relative; z-index:1; }
+
+    /* Gradient overlay so text stays readable over SVG animations */
+    .bt-grad {
+      position:absolute; bottom:0; left:0; right:0; height:70%;
+      background:linear-gradient(to top, var(--surface) 55%, transparent 100%);
+      z-index:0; pointer-events:none;
+    }
+
+    /* Feature list (icon + text rows) */
+    .bt-feat-list { display:flex; flex-direction:column; gap:8px; margin-top:.6rem; }
+    .bt-feat {
+      display:flex; align-items:flex-start; gap:10px;
+      font-size:11.5px; color:var(--muted); line-height:1.55;
+    }
+    .bt-feat-icon {
+      width:28px; height:28px; border-radius:6px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(61,255,192,.08); margin-top:1px;
+    }
+    .bt-feat-icon svg { width:14px; height:14px; stroke:var(--accent); fill:none; stroke-width:1.8; }
+    .bt-feat-icon.v { background:rgba(167,139,250,.08); }
+    .bt-feat-icon.v svg { stroke:var(--accent2); }
+    .bt-feat-icon.r { background:rgba(255,107,107,.08); }
+    .bt-feat-icon.r svg { stroke:var(--accent3); }
+    .bt-feat-icon.y { background:rgba(245,158,11,.08); }
+    .bt-feat-icon.y svg { stroke:var(--accent4); }
+    .bt-feat strong { color:var(--text); }
+
+    /* Stat display */
+    .bt-stat { margin-top:.75rem; }
+    .bt-stat-num {
+      font-family:var(--disp); font-size:2.4rem; font-weight:800; line-height:1;
+      color:var(--accent); letter-spacing:-.03em;
+    }
+    .bt-stat-num.v { color:var(--accent2); }
+    .bt-stat-lbl { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; opacity:.7; }
+
+    /* Video tile */
+    .bt-video {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; opacity:.45; pointer-events:none;
+    }
+    .bt-video-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(8,8,14,.55) 0%, rgba(8,8,14,.15) 50%, rgba(8,8,14,.65) 100%);
+      z-index:0;
+    }
+
+    /* PCB floating trace animation */
+    @keyframes pcb-drift {
+      0%   { transform:translate(0,0) rotate(0deg); opacity:.18; }
+      33%  { transform:translate(8px,-6px) rotate(1.5deg); opacity:.28; }
+      66%  { transform:translate(-5px,4px) rotate(-1deg); opacity:.2; }
+      100% { transform:translate(0,0) rotate(0deg); opacity:.18; }
+    }
+    @keyframes trace-pulse {
+      0%,100% { stroke-opacity:.15; }
+      50%      { stroke-opacity:.45; }
+    }
+    @keyframes dot-blink {
+      0%,100% { opacity:.2; } 50% { opacity:.9; }
+    }
+    .pcb-layer { animation:pcb-drift 8s ease-in-out infinite; }
+    .pcb-layer:nth-child(2) { animation-duration:11s; animation-delay:-3s; }
+    .pcb-layer:nth-child(3) { animation-duration:14s; animation-delay:-7s; }
+    .pcb-trace { animation:trace-pulse 3s ease-in-out infinite; }
+    .pcb-trace:nth-child(2n) { animation-delay:-1.5s; }
+    .pcb-dot { animation:dot-blink 2s ease-in-out infinite; }
+    .pcb-dot:nth-child(3n) { animation-delay:-0.8s; }
+
+    /* Signal wave animation (for comm protocols tile) */
+    @keyframes wave-scroll {
+      from { transform:translateX(0); }
+      to   { transform:translateX(-50%); }
+    }
+    .wave-scroll { animation:wave-scroll 4s linear infinite; }
+
+    /* Oscilloscope scan line */
+    @keyframes scope-scan {
+      0%   { transform:translateX(-100%); opacity:0; }
+      5%   { opacity:1; }
+      95%  { opacity:.7; }
+      100% { transform:translateX(200%); opacity:0; }
+    }
+    @keyframes scope-grid-pulse {
+      0%,100% { opacity:.06; } 50% { opacity:.14; }
+    }
+    .scope-scan  { animation:scope-scan 3.5s ease-in-out infinite; }
+    .scope-grid  { animation:scope-grid-pulse 4s ease-in-out infinite; }
+
+    /* Servo motor spin */
+    @keyframes servo-spin {
+      from { transform:rotate(0deg); }
+      to   { transform:rotate(360deg); }
+    }
+    @keyframes servo-wobble {
+      0%,100% { transform:rotate(-15deg); }
+      50%     { transform:rotate(15deg); }
+    }
+    .servo-rotor { animation:servo-wobble 2s ease-in-out infinite; transform-origin:50% 50%; }
+    @keyframes encoder-tick {
+      0%,100% { opacity:.3; } 12% { opacity:1; }
+    }
+    .enc-tick { animation:encoder-tick 1.2s steps(1) infinite; }
+    .enc-tick:nth-child(2) { animation-delay:-.15s; }
+    .enc-tick:nth-child(3) { animation-delay:-.3s; }
+    .enc-tick:nth-child(4) { animation-delay:-.45s; }
+
+    /* Vision dome scan */
+    @keyframes dome-scan {
+      0%,100% { transform:scaleX(1); opacity:.5; }
+      50%      { transform:scaleX(1.08); opacity:.9; }
+    }
+    @keyframes crosshair-pulse {
+      0%,100% { opacity:.3; r:6; }
+      50%      { opacity:1;  r:9; }
+    }
+    .dome-ring { animation:dome-scan 2.5s ease-in-out infinite; transform-origin:50% 50%; }
+    .ch-pulse   { animation:crosshair-pulse 1.8s ease-in-out infinite; }
+
+    /* Power supply ripple */
+    @keyframes volt-ripple {
+      0%   { transform:translateY(0) scaleY(1); }
+      50%  { transform:translateY(-3px) scaleY(1.08); }
+      100% { transform:translateY(0) scaleY(1); }
+    }
+    @keyframes rail-glow {
+      0%,100% { stroke-opacity:.3; } 50% { stroke-opacity:.8; }
+    }
+    .volt-wave { animation:volt-ripple 2s ease-in-out infinite; transform-origin:50% 50%; }
+    .rail-glow { animation:rail-glow 2s ease-in-out infinite; }
+
     /* ══════════════════════════════
        PROJECTS — Plain-text cyberpunk layout
     ══════════════════════════════ */
@@ -1377,19 +1604,348 @@
     <p class="sec-tag reveal">// 002</p>
     <h2 class="sec-title reveal">Experience</h2>
     <div class="timeline">
-      <div class="tl-item reveal">
-        <div class="tl-date">Jan 2025 – Present</div>
-        <div class="tl-role">Associate Design Engineer – Robotics</div>
-        <div class="tl-company">Systemantics India Pvt Ltd</div>
-        <div class="tl-desc"><ul>
-         <li>Designed and developed <strong>embedded electronics subsystems</strong> for a collaborative robot, including Raspberry Pi(CM5) based system control, stepper motor controllers, force-torque sensing modules, and LVDT controllers, with end-to-end schematic and PCB design following DFM/DFA principles.</li>
-         <li>Performed <strong>circuit design, power budgeting, component selection</strong> and tolerance analysis, including buck/boost power supply design with detailed calculations and worst-case analysis; validated through testing and debugging.</li>
-         <li>Designed <strong>STM32</strong>-based embedded hardware with CAN, SPI, I2C, UART, RS485, and ADC interfaces for sensor acquisition, real-time control, and subsystem communication.</li>
-         <li>Worked on high-speed interfaces including <strong>Gigabit Ethernet, USB 3.0</strong>, HDMI, and PCIe, considering signal integrity, routing constraints, and PCB stack-up design.</li>
-         <li>Conducted hardware validation and debugging using oscilloscopes and logic analyzers, performing root cause analysis(RCA) to ensure robust performance, reliability, and system integration.</li>
-         <li><strong>Led the development</strong> of a jet engine turbine blade metrology and inspection station, integrating LVDT-based dimensional measurement with a machine vision diffuse dome illumination system for automated defect detection.</li>
-         <li>Developed <strong>STM32-based embedded firmware</strong> for real-time control, communication, and hardware interfacing across multiple subsystems, including closed-loop stepper motor servo control with encoder feedback</li>        </ul></div>
-      </div>
+      <!-- ══════════════════════════════════════════════
+           BENTO JOB BLOCK — Systemantics (Current Role)
+           To reuse: copy this entire .bento-job div,
+           swap content inside .bento-grid tiles.
+      ══════════════════════════════════════════════ -->
+      <div class="bento-job reveal">
+        <div class="bento-job-header">
+          <div class="tl-date">Jan 2025 – Present</div>
+          <div class="tl-role">Associate Design Engineer – Robotics</div>
+          <div class="tl-company">Systemantics India Pvt Ltd</div>
+        </div>
+
+        <div class="bento-grid">
+
+          <!-- ── TILE 1 (wide, tall): PCB & Embedded Subsystems — floating PCB animation ── -->
+          <!-- TO EDIT: swap the SVG below with an <img src="images/your-pcb.png"> or multiple <img> layered with .pcb-layer class -->
+          <div class="bt bt-c8 bt-r2">
+            <!-- PCB floating layers animation -->
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 520 340" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background grid -->
+                <defs>
+                  <pattern id="pcb-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M20 0 L0 0 0 20" fill="none" stroke="#3dffc0" stroke-width="0.3" opacity="0.07"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#pcb-grid)"/>
+
+                <!-- PCB layer 1 — main board outline -->
+                <g class="pcb-layer" style="transform-origin:260px 170px">
+                  <rect x="60" y="40" width="380" height="240" rx="8" fill="none" stroke="#3dffc0" stroke-width="1" opacity="0.18"/>
+                  <!-- Traces horizontal -->
+                  <line class="pcb-trace" x1="80" y1="80" x2="220" y2="80" stroke="#3dffc0" stroke-width="1.5"/>
+                  <line class="pcb-trace" x1="220" y1="80" x2="220" y2="120" stroke="#3dffc0" stroke-width="1.5"/>
+                  <line class="pcb-trace" x1="220" y1="120" x2="380" y2="120" stroke="#3dffc0" stroke-width="1.5"/>
+                  <line class="pcb-trace" x1="100" y1="180" x2="300" y2="180" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-0.6s"/>
+                  <line class="pcb-trace" x1="300" y1="180" x2="300" y2="240" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-0.6s"/>
+                  <line class="pcb-trace" x1="300" y1="240" x2="420" y2="240" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-0.6s"/>
+                  <!-- via dots -->
+                  <circle class="pcb-dot" cx="220" cy="80"  r="4" fill="none" stroke="#3dffc0" stroke-width="1.5"/>
+                  <circle class="pcb-dot" cx="220" cy="120" r="4" fill="none" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-0.4s"/>
+                  <circle class="pcb-dot" cx="300" cy="180" r="4" fill="none" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-0.8s"/>
+                  <circle class="pcb-dot" cx="300" cy="240" r="4" fill="none" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-1.2s"/>
+                  <!-- IC pads -->
+                  <rect x="130" y="95"  width="60" height="40" rx="3" fill="rgba(61,255,192,.05)" stroke="#3dffc0" stroke-width="1" opacity="0.35"/>
+                  <rect x="310" y="145" width="70" height="50" rx="3" fill="rgba(61,255,192,.05)" stroke="#3dffc0" stroke-width="1" opacity="0.35"/>
+                  <text x="160" y="120" fill="#3dffc0" font-size="8" text-anchor="middle" opacity="0.4" font-family="monospace">CM5</text>
+                  <text x="345" y="175" fill="#3dffc0" font-size="8" text-anchor="middle" opacity="0.4" font-family="monospace">STM32</text>
+                </g>
+
+                <!-- PCB layer 2 — secondary traces, offset and drifting differently -->
+                <g class="pcb-layer" style="transform-origin:260px 170px; opacity:0.12;">
+                  <line x1="90"  y1="150" x2="180" y2="150" stroke="#a78bfa" stroke-width="1"/>
+                  <line x1="180" y1="150" x2="180" y2="200" stroke="#a78bfa" stroke-width="1"/>
+                  <line x1="180" y1="200" x2="360" y2="200" stroke="#a78bfa" stroke-width="1"/>
+                  <line x1="360" y1="200" x2="360" y2="260" stroke="#a78bfa" stroke-width="1"/>
+                  <circle cx="180" cy="150" r="3" fill="none" stroke="#a78bfa" stroke-width="1"/>
+                  <circle cx="180" cy="200" r="3" fill="none" stroke="#a78bfa" stroke-width="1"/>
+                  <circle cx="360" cy="200" r="3" fill="none" stroke="#a78bfa" stroke-width="1"/>
+                  <!-- connector pads row -->
+                  <rect x="70" y="255" width="8" height="18" rx="1" fill="#a78bfa" opacity="0.3"/>
+                  <rect x="84" y="255" width="8" height="18" rx="1" fill="#a78bfa" opacity="0.3"/>
+                  <rect x="98" y="255" width="8" height="18" rx="1" fill="#a78bfa" opacity="0.3"/>
+                  <rect x="112" y="255" width="8" height="18" rx="1" fill="#a78bfa" opacity="0.3"/>
+                  <rect x="126" y="255" width="8" height="18" rx="1" fill="#a78bfa" opacity="0.3"/>
+                </g>
+
+                <!-- PCB layer 3 — power plane fragments -->
+                <g class="pcb-layer" style="transform-origin:260px 170px; opacity:0.09;">
+                  <rect x="90" y="55" width="100" height="30" rx="2" fill="#f59e0b" stroke="#f59e0b" stroke-width="0.5"/>
+                  <rect x="310" y="55" width="120" height="30" rx="2" fill="#f59e0b" stroke="#f59e0b" stroke-width="0.5"/>
+                  <text x="140" y="75" fill="#f59e0b" font-size="7" text-anchor="middle" font-family="monospace" opacity="0.8">+3.3V</text>
+                  <text x="370" y="75" fill="#f59e0b" font-size="7" text-anchor="middle" font-family="monospace" opacity="0.8">+5V</text>
+                </g>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <!-- TO REPLACE WITH YOUR PCB IMAGES: remove the SVG above and uncomment below:
+            <img src="images/pcb-main.png" class="bt-video" style="opacity:.3; object-fit:cover;" alt="PCB photo"/>
+            <img src="images/pcb-detail.png" class="pcb-layer bt-vis" style="opacity:.18; object-fit:contain;" alt=""/>
+            -->
+            <div class="bt-tag">01 — Embedded Electronics</div>
+            <div class="bt-title">PCB & Embedded Subsystems</div>
+            <div class="bt-desc">Designed <strong>Raspberry Pi CM5</strong> system control, stepper motor controllers, force-torque sensing modules, and LVDT controllers — end-to-end schematic and PCB design following <strong>DFM/DFA</strong> principles.</div>
+            <div class="bt-chips">
+              <span class="bt-chip">KiCad</span>
+              <span class="bt-chip">Altium</span>
+              <span class="bt-chip v">DFM/DFA</span>
+              <span class="bt-chip y">RPi CM5</span>
+            </div>
+          </div>
+
+          <!-- ── TILE 2 (narrow tall): Protocol Stack — animated signal waves ── -->
+          <div class="bt bt-c4 bt-r2">
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 200 340" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Scrolling digital waveforms for each protocol -->
+                <defs>
+                  <clipPath id="wave-clip"><rect x="0" y="0" width="200" height="340"/></clipPath>
+                </defs>
+                <g clip-path="url(#wave-clip)">
+                  <!-- CAN waveform -->
+                  <g class="wave-scroll" style="width:400px">
+                    <polyline points="0,48 20,48 20,58 40,58 40,48 60,48 60,58 70,58 70,48 90,48 90,58 110,58 110,48 130,48 130,58 150,58 150,48 170,48 170,58 200,58 200,48 220,48 220,58 240,58 240,48 260,48 260,58 280,58 280,48 300,48 300,58 320,58 320,48 340,48 340,58 360,58 360,48 380,48 380,58 400,58"
+                      fill="none" stroke="#3dffc0" stroke-width="1.2" opacity="0.45"/>
+                  </g>
+                  <text x="10" y="44" fill="#3dffc0" font-size="7" font-family="monospace" opacity="0.5">CAN</text>
+
+                  <!-- SPI waveform -->
+                  <g class="wave-scroll" style="animation-duration:3s;animation-delay:-.5s">
+                    <polyline points="0,98 15,98 15,110 25,110 25,98 35,98 35,110 45,110 45,98 55,98 55,110 65,110 65,98 75,98 75,110 85,110 85,98 95,98 95,110 105,110 105,98 115,98 115,110 125,110 125,98 135,98 135,110 145,110 145,98 155,98 155,110 165,110 165,98 175,98 175,110 185,110 185,98 195,98 195,110 200,110 215,98 215,110 225,110 225,98 235,98 235,110 245,110 245,98 255,98 255,110 265,110 265,98 275,98 275,110 285,110 285,98 295,98 295,110 305,110 305,98 315,98 315,110 325,110 325,98 335,98 335,110 345,110 345,98 355,98 355,110 365,110 365,98 375,98 375,110 385,110 385,98 400,98"
+                      fill="none" stroke="#a78bfa" stroke-width="1.2" opacity="0.4"/>
+                  </g>
+                  <text x="10" y="94" fill="#a78bfa" font-size="7" font-family="monospace" opacity="0.5">SPI</text>
+
+                  <!-- I2C -->
+                  <g class="wave-scroll" style="animation-duration:5s;animation-delay:-1s">
+                    <polyline points="0,148 30,148 30,160 50,160 50,148 80,148 80,160 100,160 100,148 130,148 130,160 150,160 150,148 180,148 180,160 200,160 200,148 230,148 230,160 250,160 250,148 280,148 280,160 300,160 300,148 330,148 330,160 350,160 350,148 380,148 380,160 400,160"
+                      fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.4"/>
+                  </g>
+                  <text x="10" y="144" fill="#00e5ff" font-size="7" font-family="monospace" opacity="0.5">I2C</text>
+
+                  <!-- UART -->
+                  <g class="wave-scroll" style="animation-duration:3.8s;animation-delay:-.8s">
+                    <polyline points="0,198 10,198 10,210 30,210 30,198 40,198 40,210 50,210 50,198 70,198 70,210 80,210 80,198 100,198 100,210 110,210 110,198 120,198 120,210 140,210 140,198 160,198 160,210 170,210 170,198 190,198 190,210 200,210 210,198 220,198 220,210 240,210 240,198 250,198 250,210 270,210 270,198 290,198 290,210 300,210 300,198 310,198 310,210 330,210 330,198 360,198 360,210 370,210 370,198 390,198 390,210 400,210"
+                      fill="none" stroke="#ff6b6b" stroke-width="1.2" opacity="0.4"/>
+                  </g>
+                  <text x="10" y="194" fill="#ff6b6b" font-size="7" font-family="monospace" opacity="0.5">UART</text>
+
+                  <!-- RS485 -->
+                  <g class="wave-scroll" style="animation-duration:4.5s;animation-delay:-2s">
+                    <polyline points="0,248 20,248 20,260 50,260 50,248 70,248 70,260 100,260 100,248 120,248 120,260 150,260 150,248 170,248 170,260 200,260 200,248 220,248 220,260 250,260 250,248 270,248 270,260 300,260 300,248 320,248 320,260 350,260 350,248 370,248 370,260 400,260"
+                      fill="none" stroke="#f59e0b" stroke-width="1.2" opacity="0.4"/>
+                  </g>
+                  <text x="10" y="244" fill="#f59e0b" font-size="7" font-family="monospace" opacity="0.5">RS485</text>
+
+                  <!-- ADC line -->
+                  <g class="wave-scroll" style="animation-duration:6s;animation-delay:-3s">
+                    <path d="M0,300 C10,280 20,320 40,300 C60,280 70,320 90,300 C110,280 120,320 140,300 C160,280 170,320 190,300 C210,280 220,320 240,300 C260,280 270,320 290,300 C310,280 320,320 340,300 C360,280 370,320 390,300 C410,280"
+                      fill="none" stroke="#7cff00" stroke-width="1.2" opacity="0.35"/>
+                  </g>
+                  <text x="10" y="294" fill="#7cff00" font-size="7" font-family="monospace" opacity="0.5">ADC</text>
+                </g>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">02 — STM32 Hardware</div>
+            <div class="bt-title">Communication Protocols</div>
+            <div class="bt-chips">
+              <span class="bt-chip">CAN</span>
+              <span class="bt-chip v">SPI / I2C</span>
+              <span class="bt-chip r">UART</span>
+              <span class="bt-chip y">RS485</span>
+              <span class="bt-chip">ADC/DAC</span>
+            </div>
+          </div>
+
+          <!-- ── TILE 3 (medium): Power Supply Design ── -->
+          <div class="bt bt-c4">
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Voltage rail glow lines -->
+                <line class="rail-glow" x1="20" y1="50"  x2="220" y2="50"  stroke="#f59e0b" stroke-width="1.5"/>
+                <line class="rail-glow" x1="20" y1="130" x2="220" y2="130" stroke="#3dffc0" stroke-width="1.5" style="animation-delay:-.8s"/>
+                <text x="20" y="44" fill="#f59e0b" font-size="7" font-family="monospace" opacity="0.5">+5V Rail</text>
+                <text x="20" y="144" fill="#3dffc0" font-size="7" font-family="monospace" opacity="0.5">+3.3V Rail</text>
+
+                <!-- Buck converter symbol -->
+                <g class="volt-wave" style="transform-origin:120px 90px">
+                  <rect x="85" y="70" width="70" height="40" rx="4" fill="rgba(245,158,11,.06)" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+                  <text x="120" y="95" fill="#f59e0b" font-size="9" text-anchor="middle" font-family="monospace" opacity="0.6">BUCK</text>
+                </g>
+                <!-- Inductor coil symbol -->
+                <path d="M30,90 Q37,78 44,90 Q51,102 58,90 Q65,78 72,90" fill="none" stroke="#3dffc0" stroke-width="1.5" opacity="0.4"/>
+                <!-- Capacitors -->
+                <line x1="190" y1="72" x2="190" y2="108" stroke="#a78bfa" stroke-width="3" opacity="0.35"/>
+                <line x1="196" y1="72" x2="196" y2="108" stroke="#a78bfa" stroke-width="3" opacity="0.35"/>
+                <!-- Ripple wave -->
+                <path class="volt-wave" d="M20,90 Q30,70 40,90 Q50,110 60,90 Q70,70 80,90" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.25" style="animation-delay:-.5s;transform-origin:50px 90px"/>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">03 — Power Design</div>
+            <div class="bt-title">Power Budgeting & Supply Design</div>
+            <div class="bt-desc"><strong>Buck/boost</strong> topology design with worst-case analysis, tolerance stackup & thermal validation.</div>
+          </div>
+
+          <!-- ── TILE 4 (medium): High-Speed Interfaces ── -->
+          <div class="bt bt-c4">
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Diff pair traces — two parallel lines, slightly wavy -->
+                <defs>
+                  <filter id="glow-hs"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <!-- GbE pair -->
+                <line class="pcb-trace" x1="20" y1="55" x2="220" y2="55" stroke="#3dffc0" stroke-width="1.5" opacity="0.4" filter="url(#glow-hs)"/>
+                <line class="pcb-trace" x1="20" y1="63" x2="220" y2="63" stroke="#3dffc0" stroke-width="1.5" opacity="0.4" filter="url(#glow-hs)" style="animation-delay:-.3s"/>
+                <text x="22" y="48" fill="#3dffc0" font-size="7" font-family="monospace" opacity="0.5">GbE — 1Gbps</text>
+                <!-- USB3 pair -->
+                <line class="pcb-trace" x1="20" y1="95" x2="220" y2="95" stroke="#a78bfa" stroke-width="1.5" opacity="0.35" style="animation-delay:-.5s"/>
+                <line class="pcb-trace" x1="20" y1="103" x2="220" y2="103" stroke="#a78bfa" stroke-width="1.5" opacity="0.35" style="animation-delay:-.8s"/>
+                <text x="22" y="88" fill="#a78bfa" font-size="7" font-family="monospace" opacity="0.5">USB 3.0 — 5Gbps</text>
+                <!-- PCIe -->
+                <line class="pcb-trace" x1="20" y1="135" x2="220" y2="135" stroke="#ff6b6b" stroke-width="1.5" opacity="0.35" style="animation-delay:-1s"/>
+                <line class="pcb-trace" x1="20" y1="143" x2="220" y2="143" stroke="#ff6b6b" stroke-width="1.5" opacity="0.35" style="animation-delay:-1.3s"/>
+                <text x="22" y="128" fill="#ff6b6b" font-size="7" font-family="monospace" opacity="0.5">PCIe — 8Gbps</text>
+                <!-- HDMI -->
+                <line class="pcb-trace" x1="20" y1="165" x2="220" y2="165" stroke="#f59e0b" stroke-width="1" opacity="0.3" style="animation-delay:-1.5s"/>
+                <line class="pcb-trace" x1="20" y1="171" x2="220" y2="171" stroke="#f59e0b" stroke-width="1" opacity="0.3" style="animation-delay:-1.8s"/>
+                <text x="22" y="160" fill="#f59e0b" font-size="7" font-family="monospace" opacity="0.5">HDMI</text>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">04 — Signal Integrity</div>
+            <div class="bt-title">High-Speed Interfaces</div>
+            <div class="bt-chips">
+              <span class="bt-chip">GbE</span>
+              <span class="bt-chip v">USB 3.0</span>
+              <span class="bt-chip r">PCIe</span>
+              <span class="bt-chip y">HDMI</span>
+            </div>
+          </div>
+
+          <!-- ── TILE 5 (wide): Metrology Station — VIDEO TILE ── -->
+          <!-- TO EDIT: replace the src below with your actual video path, e.g. src="images/metrology.mp4" -->
+          <div class="bt bt-c8">
+            <!-- VIDEO PLACEHOLDER — swap src with your actual video file -->
+            <!-- <video class="bt-video" src="images/metrology.mp4" autoplay muted loop playsinline></video> -->
+
+            <!-- Animated placeholder (remove when you add your video) -->
+            <div class="bt-vis" style="background:radial-gradient(ellipse at 50% 40%, rgba(0,229,255,.06) 0%, transparent 70%);">
+              <svg width="100%" height="100%" viewBox="0 0 520 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Dome rings -->
+                <ellipse class="dome-ring" cx="260" cy="90" rx="90" ry="30" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.3"/>
+                <ellipse class="dome-ring" cx="260" cy="90" rx="70" ry="22" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.25" style="animation-delay:-.5s;animation-duration:2s"/>
+                <ellipse class="dome-ring" cx="260" cy="90" rx="50" ry="15" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.2" style="animation-delay:-1s;animation-duration:3s"/>
+                <!-- Crosshair -->
+                <line x1="220" y1="90" x2="300" y2="90" stroke="#00e5ff" stroke-width="0.8" opacity="0.45"/>
+                <line x1="260" y1="50" x2="260" y2="130" stroke="#00e5ff" stroke-width="0.8" opacity="0.45"/>
+                <circle class="ch-pulse" cx="260" cy="90" r="6" fill="none" stroke="#00e5ff" stroke-width="1.2"/>
+                <!-- LVDT symbol -->
+                <rect x="60" y="70" width="80" height="40" rx="3" fill="rgba(61,255,192,.04)" stroke="#3dffc0" stroke-width="1" opacity="0.4"/>
+                <text x="100" y="95" fill="#3dffc0" font-size="8" text-anchor="middle" font-family="monospace" opacity="0.5">LVDT</text>
+                <line x1="140" y1="90" x2="175" y2="90" stroke="#3dffc0" stroke-width="1" opacity="0.4" stroke-dasharray="4,3"/>
+                <!-- Turbine blade cross-section hint -->
+                <path d="M380,60 Q420,75 440,90 Q420,105 380,120 Q370,90 380,60Z" fill="rgba(245,158,11,.05)" stroke="#f59e0b" stroke-width="1" opacity="0.35"/>
+                <text x="410" y="93" fill="#f59e0b" font-size="7" text-anchor="middle" font-family="monospace" opacity="0.45">blade</text>
+                <!-- scan line -->
+                <line x1="175" y1="50" x2="175" y2="140" stroke="#00e5ff" stroke-width="0.8" opacity="0" style="animation:scope-scan 2.8s ease-in-out infinite"/>
+              </svg>
+            </div>
+            <div class="bt-video-overlay"></div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">05 — Metrology & Vision</div>
+            <div class="bt-title">Turbine Blade Inspection Station</div>
+            <div class="bt-desc"><strong>Led development</strong> — LVDT dimensional measurement + machine vision diffuse dome illumination for automated defect detection on jet engine turbine blades.</div>
+            <!-- Video credit note (remove in production) -->
+            <div style="position:absolute;top:12px;right:14px;font-size:8px;color:rgba(0,229,255,.35);letter-spacing:.1em;z-index:2;">
+              ▶ ADD VIDEO: src="images/metrology.mp4"
+            </div>
+          </div>
+
+          <!-- ── TILE 6 (narrow): Hardware Validation / Oscilloscope ── -->
+          <div class="bt bt-c4">
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 200 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Oscilloscope grid -->
+                <defs>
+                  <pattern id="scope-grid-pat" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <line x1="20" y1="0" x2="20" y2="20" stroke="#3dffc0" stroke-width="0.3"/>
+                    <line x1="0" y1="10" x2="20" y2="10" stroke="#3dffc0" stroke-width="0.2"/>
+                  </pattern>
+                </defs>
+                <rect x="10" y="20" width="180" height="130" rx="4" fill="rgba(0,0,0,.4)" stroke="#3dffc0" stroke-width="0.8" opacity="0.4"/>
+                <rect class="scope-grid" x="10" y="20" width="180" height="130" rx="4" fill="url(#scope-grid-pat)"/>
+                <!-- Waveform trace -->
+                <path d="M10,85 Q30,55 50,85 Q70,115 90,85 Q110,55 130,85 Q150,115 170,85 L190,85" fill="none" stroke="#3dffc0" stroke-width="1.5" opacity="0.7"/>
+                <!-- Scan line -->
+                <rect class="scope-scan" x="0" y="18" width="8" height="134" rx="2" fill="rgba(61,255,192,.15)"/>
+                <!-- Measurements -->
+                <text x="15" y="170" fill="#3dffc0" font-size="7" font-family="monospace" opacity="0.45">CH1: 3.3V  2ms/div</text>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">06 — Validation</div>
+            <div class="bt-title">Hardware Debug & RCA</div>
+            <div class="bt-desc">Oscilloscopes, logic analyzers — root cause analysis for system integration.</div>
+          </div>
+
+          <!-- ── TILE 7 (wide): STM32 Firmware — servo motor animation ── -->
+          <div class="bt bt-c8">
+            <div class="bt-vis">
+              <svg width="100%" height="100%" viewBox="0 0 520 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <!-- Servo motor body -->
+                <rect x="200" y="55" width="120" height="80" rx="8" fill="rgba(61,255,192,.04)" stroke="#3dffc0" stroke-width="1" opacity="0.4"/>
+                <text x="260" y="100" fill="#3dffc0" font-size="8" text-anchor="middle" font-family="monospace" opacity="0.45">STM32</text>
+                <!-- Rotor arm -->
+                <g class="servo-rotor" style="transform-origin:260px 95px">
+                  <line x1="260" y1="95" x2="310" y2="75" stroke="#3dffc0" stroke-width="2" opacity="0.6"/>
+                  <circle cx="310" cy="75" r="5" fill="rgba(61,255,192,.3)" stroke="#3dffc0" stroke-width="1"/>
+                </g>
+                <!-- Encoder ticks around motor -->
+                <g opacity="0.35">
+                  <rect class="enc-tick" x="258" y="38" width="4" height="12" rx="1" fill="#3dffc0"/>
+                  <rect class="enc-tick" x="285" y="42" width="4" height="10" rx="1" fill="#3dffc0" transform="rotate(30,287,47)"/>
+                  <rect class="enc-tick" x="306" y="55" width="4" height="10" rx="1" fill="#3dffc0" transform="rotate(60,308,60)"/>
+                  <rect class="enc-tick" x="316" y="78" width="12" height="4" rx="1" fill="#3dffc0"/>
+                </g>
+                <!-- Code snippet left side -->
+                <text x="30" y="65" fill="#a78bfa" font-size="8" font-family="monospace" opacity="0.45">void motorControl() {</text>
+                <text x="30" y="80" fill="#3dffc0" font-size="8" font-family="monospace" opacity="0.4">  encoder_read();</text>
+                <text x="30" y="95" fill="#3dffc0" font-size="8" font-family="monospace" opacity="0.4">  pid_compute();</text>
+                <text x="30" y="110" fill="#ff6b6b" font-size="8" font-family="monospace" opacity="0.4">  pwm_output(duty);</text>
+                <text x="30" y="125" fill="#a78bfa" font-size="8" font-family="monospace" opacity="0.45">}</text>
+                <!-- Feedback arrow -->
+                <path d="M170,100 Q185,140 260,140 Q335,140 350,100" fill="none" stroke="#3dffc0" stroke-width="1" stroke-dasharray="5,4" opacity="0.3"/>
+                <text x="260" y="158" fill="#3dffc0" font-size="7" text-anchor="middle" font-family="monospace" opacity="0.3">closed-loop feedback</text>
+                <!-- Right side — CAN bus line -->
+                <text x="395" y="65" fill="#f59e0b" font-size="8" font-family="monospace" opacity="0.45">CAN_Tx();</text>
+                <text x="395" y="80" fill="#f59e0b" font-size="8" font-family="monospace" opacity="0.4">HAL_SPI();</text>
+                <text x="395" y="95" fill="#f59e0b" font-size="8" font-family="monospace" opacity="0.4">I2C_Read();</text>
+                <text x="395" y="110" fill="#f59e0b" font-size="8" font-family="monospace" opacity="0.4">UART_Send();</text>
+              </svg>
+            </div>
+            <div class="bt-grad"></div>
+            <div class="bt-tag">07 — Firmware</div>
+            <div class="bt-title">STM32 Embedded Firmware</div>
+            <div class="bt-feat-list">
+              <div class="bt-feat">
+                <div class="bt-feat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+                <span><strong>Real-time control</strong> — multi-subsystem firmware with FreeRTOS task management</span>
+              </div>
+              <div class="bt-feat">
+                <div class="bt-feat-icon v"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+                <span><strong>Closed-loop stepper servo</strong> — encoder feedback, PID control</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.bento-grid -->
+      </div><!-- /.bento-job -->
       <div class="tl-item reveal">
         <div class="tl-date">2022 – 2025</div>
         <div class="tl-role">Electrical Lead</div>
